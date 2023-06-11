@@ -4,8 +4,7 @@ class Player:
         self.mana = 0
         self.hand = []
         self.played = []
-        self.deck = [Card(cost=2, damage=3, target=None)
-                     for i in range(30)] if deck is None else deck
+        self.deck = [Card(cost=2) for i in range(30)] if deck is None else deck
 
     def draw(self, amount=1):
         for _ in range(amount):
@@ -19,7 +18,7 @@ class Player:
 
 
 class Card:
-    def __init__(self, name='Frostbolt', cost=2, damage=0, target=None):
+    def __init__(self, cost, name="Frostbolt", damage=0, target=None):
         self.name = name
         self.mana_cost = cost
         self.damage = damage
@@ -76,7 +75,8 @@ class Game:
                     to_play.append(card_index)
             except ValueError:
                 print(
-                    "Invalid input. Please enter a valid card index or press Enter to skip your turn.")
+                    "Invalid input. Please enter a valid card index or press Enter to skip your turn."
+                )
 
         to_play.sort(reverse=True)
         for i in to_play:
