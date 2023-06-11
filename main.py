@@ -1,6 +1,10 @@
+from cards import *
+
+
 class Player:
     def __init__(self, deck=None, renathal=False):
         self.health = 35 if renathal else 30
+        self.max_health = 35 if renathal else 30
         self.mana = 0
         self.hand = []
         self.played = []
@@ -10,19 +14,21 @@ class Player:
         for _ in range(amount):
             self.hand.append(self.deck.pop())
 
-    def play(self, card):
-        # as complexity rises pop the specific card played
-        # currently all of the cards are the same
-        self.played.append(self.hand.pop())
-        return card.damage
+    def play(self, card_index, opponent):
+        card: Card = self.hand[card_index]
+        if self.mana >= card.mana_cost:
+            card.play(self, opponent)
+            self.played.append(self.hand.pop(card_index))
 
 
 class Card:
-    def __init__(self, cost, name="Frostbolt", damage=0, target=None):
+    def __init__(self, cost, effect, name="Frostbolt"):
         self.name = name
         self.mana_cost = cost
-        self.damage = damage
-        self.target = target
+        self.effect = effect
+
+    def play(self, player, opponent):
+        self.effect(player, opponent)
 
 
 class Game:
@@ -35,8 +41,12 @@ class Game:
         self.player1.draw(3)
         self.player2.draw(4)
 
+        print(
+            "Enter the card index of the cards you want to play one by one. ORDER MATTERS."
+        )
+
         while not game_end:
-            self.turn(player=self.player1, index=1)
+            self.turn(player=self.player1, index=1, opponent=self.player2)
 
             if self.player1.health < 1:
                 print("Player 1 wins!")
@@ -45,7 +55,7 @@ class Game:
                 print("Player 2 wins!")
                 game_end = True
 
-            self.turn(player=self.player2, index=2)
+            self.turn(player=self.player2, index=2, opponent=self.player1)
 
             if self.player1.health < 1:
                 print("Player 1 wins!")
@@ -54,7 +64,7 @@ class Game:
                 print("Player 2 wins!")
                 game_end = True
 
-    def turn(self, player, index):
+    def turn(self, player: Player, index: int, opponent: Player):
         print(f"Player {index}'s turn!")
         if player.mana < 10:
             player.mana += 1
@@ -63,7 +73,9 @@ class Game:
         print("Your hand:")
         for i, card in enumerate(player.hand):
             print(f"{i + 1}. {card.name}")
-        print("Enter the card index of the cards you want to play one by one.")
+        print("Player 1 HP: ", player.health)
+        print("Player 2 HP: ", opponent.health)
+        print()
         to_play = []
         while True:
             card_index = input()
@@ -78,11 +90,15 @@ class Game:
                     "Invalid input. Please enter a valid card index or press Enter to skip your turn."
                 )
 
-        to_play.sort(reverse=True)
         for i in to_play:
-            player.hand.pop(i)
+            # this maintains playing order
+            for j in range(i + 1, len(to_play)):
+                to_play[j] -= 1
+            player.play(card_index=i, opponent=opponent)
 
 
 if __name__ == "__main__":
-    game = Game()
+    p1_deck = get_random_deck()
+    p2_deck = get_random_deck()
+    game = Game(p1_deck=p1_deck, p2_deck=p2_deck)
     game.game_loop()
