@@ -88,17 +88,10 @@ class Game:
                     "Invalid input. Please enter a valid card index or press Enter to skip your turn."
                 )
 
-        # for i in to_play:
-        # card: Card = player.hand[i]
-        # if player.mana >= card.mana_cost:
-        # for j in range(i + 1, len(to_play)):
-        # to_play[j] -= 1
-        # player.play(card_index=i, opponent=opponent)
-
         i = 0
-
         while i < len(to_play):
-            if to_play[i] < len(player.hand):  # check if the card index is still valid
+            # check if the card index is still valid. important
+            if to_play[i] < len(player.hand):
                 card: Card = player.hand[to_play[i]]
                 if player.mana >= card.mana_cost:
                     player.play(card_index=to_play[i], opponent=opponent)
