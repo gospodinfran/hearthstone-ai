@@ -13,7 +13,7 @@ class Player:
 
     def play(self, card):
         # as complexity rises pop the specific card played
-        # currently all of the cards are the same card
+        # currently all of the cards are the same
         self.played.append(self.hand.pop())
         return card.damage
 
@@ -30,6 +30,30 @@ class Game:
     def __init__(self, p1_deck=None, p2_deck=None):
         self.player1 = Player(deck=p1_deck)
         self.player2 = Player(deck=p2_deck)
+
+    def game_loop(self):
+        game_end = False
+        self.player1.draw(3)
+        self.player2.draw(4)
+
+        while not game_end:
+            self.turn(player=self.player1, index=1)
+
+            if self.player1.health < 1:
+                print("Player 1 wins!")
+                game_end = True
+            if self.player2.health < 1:
+                print("Player 2 wins!")
+                game_end = True
+
+            self.turn(player=self.player2, index=2)
+
+            if self.player1.health < 1:
+                print("Player 1 wins!")
+                game_end = True
+            if self.player2.health < 1:
+                print("Player 2 wins!")
+                game_end = True
 
     def turn(self, player, index):
         print(f"Player {index}'s turn!")
@@ -57,30 +81,6 @@ class Game:
         to_play.sort(reverse=True)
         for i in to_play:
             player.hand.pop(i)
-
-    def game_loop(self):
-        game_end = False
-        self.player1.draw(3)
-        self.player2.draw(4)
-
-        while not game_end:
-            self.turn(player=self.player1, index=1)
-
-            if self.player1.health < 1:
-                print("Player 1 wins!")
-                game_end = True
-            if self.player2.health < 1:
-                print("Player 2 wins!")
-                game_end = True
-
-            self.turn(player=self.player2, index=2)
-
-            if self.player1.health < 1:
-                print("Player 1 wins!")
-                game_end = True
-            if self.player2.health < 1:
-                print("Player 2 wins!")
-                game_end = True
 
 
 game = Game()
