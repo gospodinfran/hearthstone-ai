@@ -48,20 +48,12 @@ class Game:
         while not game_end:
             self.turn(player=self.player1, index=1, opponent=self.player2)
 
-            if self.player1.health < 1:
-                print("Player 1 wins!")
-                game_end = True
-            if self.player2.health < 1:
-                print("Player 2 wins!")
+            if self.game_over(self.player1.health, self.player2.health):
                 game_end = True
 
             self.turn(player=self.player2, index=2, opponent=self.player1)
 
-            if self.player1.health < 1:
-                print("Player 1 wins!")
-                game_end = True
-            if self.player2.health < 1:
-                print("Player 2 wins!")
+            if self.game_over(self.player1.health, self.player2.health):
                 game_end = True
 
     def turn(self, player: Player, index: int, opponent: Player):
@@ -95,6 +87,14 @@ class Game:
             for j in range(i + 1, len(to_play)):
                 to_play[j] -= 1
             player.play(card_index=i, opponent=opponent)
+
+    def game_over(p1_health, p2_health):
+        if p1_health < 1:
+            print("Player 2 wins!")
+            return True
+        if p2_health < 1:
+            print("Player 1 wins!")
+            return True
 
 
 if __name__ == "__main__":
