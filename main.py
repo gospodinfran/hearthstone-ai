@@ -6,9 +6,10 @@ class Player:
         self.health = 35 if renathal else 30
         self.max_health = 35 if renathal else 30
         self.mana = 0
+        self.max_mana = 0
         self.hand = []
         self.played = []
-        self.deck = [Card(cost=2) for i in range(30)] if deck is None else deck
+        self.deck = [moonfire_card for _ in range(30)] if deck is None else deck
 
     def draw(self, amount=1):
         for _ in range(amount):
@@ -16,9 +17,9 @@ class Player:
 
     def play(self, card_index, opponent):
         card: Card = self.hand[card_index]
-        if self.mana >= card.mana_cost:
-            card.play(self, opponent)
-            self.played.append(self.hand.pop(card_index))
+        card.play(self, opponent)
+        self.mana -= card.mana_cost
+        self.played.append(self.hand.pop(card_index))
 
 
 class Card:
@@ -35,6 +36,8 @@ class Game:
     def __init__(self, p1_deck=None, p2_deck=None):
         self.player1 = Player(deck=p1_deck)
         self.player2 = Player(deck=p2_deck)
+        random.shuffle(self.player1.deck)
+        random.shuffle(self.player2.deck)
 
     def game_loop(self):
         game_end = False
@@ -60,8 +63,9 @@ class Game:
 
     def turn(self, player: Player, index: int, opponent: Player):
         print(f"Player {index}'s turn!")
-        if player.mana < 10:
-            player.mana += 1
+        if player.max_mana < 10:
+            player.max_mana += 1
+        player.mana = player.max_mana
         player.draw()
         print(f"Player {index} has {player.mana} mana crystals.")
         print("Your hand:")
@@ -84,11 +88,23 @@ class Game:
                     "Invalid input. Please enter a valid card index or press Enter to skip your turn."
                 )
 
-        for i in to_play:
-            # this maintains playing order
-            for j in range(i + 1, len(to_play)):
-                to_play[j] -= 1
-            player.play(card_index=i, opponent=opponent)
+        # for i in to_play:
+        # card: Card = player.hand[i]
+        # if player.mana >= card.mana_cost:
+        # for j in range(i + 1, len(to_play)):
+        # to_play[j] -= 1
+        # player.play(card_index=i, opponent=opponent)
+
+        i = 0
+
+        while i < len(to_play):
+            if to_play[i] < len(player.hand):  # check if the card index is still valid
+                card: Card = player.hand[to_play[i]]
+                if player.mana >= card.mana_cost:
+                    player.play(card_index=to_play[i], opponent=opponent)
+                    for j in range(i + 1, len(to_play)):
+                        to_play[j] -= 1
+            i += 1
 
     def game_over(self, p1_health, p2_health):
         if p1_health < 1:
@@ -102,6 +118,6 @@ class Game:
 
 if __name__ == "__main__":
     p1_deck = get_random_deck()
-    p2_deck = [starfire_card for _ in range(30)]
+    p2_deck = [innervate_card for _ in range(15)] + [starfire_card for _ in range(15)]
     game = Game(p1_deck=p1_deck, p2_deck=p2_deck)
     game.game_loop()

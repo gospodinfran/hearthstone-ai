@@ -20,7 +20,7 @@ def healing_touch(player: Player, opponent: Player):
 
 
 def wildfire_growth(player: Player, opponent: Player):
-    player.mana += 1
+    player.max_mana += 1
 
 
 def starfire(player: Player, opponent: Player):
