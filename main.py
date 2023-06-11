@@ -48,13 +48,15 @@ class Game:
         while not game_end:
             self.turn(player=self.player1, index=1, opponent=self.player2)
 
-            if self.game_over(self.player1.health, self.player2.health):
-                game_end = True
+            game_end, winner = self.game_over(self.player1.health, self.player2.health)
+            if game_end:
+                return winner
 
             self.turn(player=self.player2, index=2, opponent=self.player1)
 
-            if self.game_over(self.player1.health, self.player2.health):
-                game_end = True
+            game_end, winner = self.game_over(self.player1.health, self.player2.health)
+            if game_end:
+                return winner
 
     def turn(self, player: Player, index: int, opponent: Player):
         print(f"Player {index}'s turn!")
@@ -65,8 +67,8 @@ class Game:
         print("Your hand:")
         for i, card in enumerate(player.hand):
             print(f"{i + 1}. {card.name}")
-        print("Player 1 HP: ", player.health)
-        print("Player 2 HP: ", opponent.health)
+        print(f"Player {index} HP: ", player.health)
+        print(f"Player {1 if index == 2 else 2} HP: ", opponent.health)
         print()
         to_play = []
         while True:
@@ -88,17 +90,18 @@ class Game:
                 to_play[j] -= 1
             player.play(card_index=i, opponent=opponent)
 
-    def game_over(p1_health, p2_health):
+    def game_over(self, p1_health, p2_health):
         if p1_health < 1:
             print("Player 2 wins!")
-            return True
+            return True, "Player2"
         if p2_health < 1:
             print("Player 1 wins!")
-            return True
+            return True, "Player1"
+        return False, None
 
 
 if __name__ == "__main__":
     p1_deck = get_random_deck()
-    p2_deck = get_random_deck()
+    p2_deck = [starfire_card for _ in range(30)]
     game = Game(p1_deck=p1_deck, p2_deck=p2_deck)
     game.game_loop()
