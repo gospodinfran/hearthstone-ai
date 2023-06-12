@@ -1,8 +1,5 @@
-from typing import List
-from main import Player, Card
+from main import Card, Player
 import random
-
-card_names = ["innervate", "moonfire", "healing_touch", "wildfire_growth", "starfire"]
 
 
 def innervate(player: Player, opponent: Player):
@@ -14,9 +11,7 @@ def moonfire(player: Player, opponent: Player):
 
 
 def healing_touch(player: Player, opponent: Player):
-    player.health += 8
-    if player.health > player.max_health:
-        player.health = player.max_health
+    player.health = min(30, player.health + 8)
 
 
 def wildfire_growth(player: Player, opponent: Player):
@@ -28,6 +23,13 @@ def starfire(player: Player, opponent: Player):
     player.draw()
 
 
+def bite(player: Player, opponent: Player):
+    player.attack += 4
+    player.armor += 4
+
+
+card_names = ["innervate", "moonfire", "healing_touch", "wildfire_growth", "starfire"]
+
 innervate_card = Card(cost=0, effect=innervate, name="Innervate")
 
 moonfire_card = Card(cost=0, effect=moonfire, name="Moonfire")
@@ -38,12 +40,15 @@ wildfire_growth_card = Card(cost=2, effect=wildfire_growth, name="Wildfire Growt
 
 starfire_card = Card(cost=6, effect=starfire, name="Starfire")
 
+bite_card = Card(cost=4, effect=bite, name="Bite")
+
 cards = [
     innervate_card,
     moonfire_card,
     healing_touch_card,
     wildfire_growth_card,
     starfire_card,
+    bite_card,
 ]
 
 

@@ -5,8 +5,10 @@ class Player:
     def __init__(self, deck=None, renathal=False):
         self.health = 35 if renathal else 30
         self.max_health = 35 if renathal else 30
+        self.armor = 0
         self.mana = 0
         self.max_mana = 0
+        self.attack = 0
         self.hand = []
         self.played = []
         self.deck = [moonfire_card for _ in range(30)] if deck is None else deck
@@ -66,6 +68,7 @@ class Game:
         if player.max_mana < 10:
             player.max_mana += 1
         player.mana = player.max_mana
+        player.attack = 0
         player.draw()
         print(f"Player {index} has {player.mana} mana crystals.")
         print("Your hand:")
@@ -111,6 +114,6 @@ class Game:
 
 if __name__ == "__main__":
     p1_deck = get_random_deck()
-    p2_deck = [innervate_card for _ in range(15)] + [starfire_card for _ in range(15)]
+    p2_deck = get_random_deck()
     game = Game(p1_deck=p1_deck, p2_deck=p2_deck)
     game.game_loop()
