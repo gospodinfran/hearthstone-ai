@@ -1,6 +1,8 @@
 from main import Card, Player
 import random
 
+# Druid
+
 
 def innervate(player: Player, opponent: Player):
     player.mana += 2
@@ -8,6 +10,16 @@ def innervate(player: Player, opponent: Player):
 
 def moonfire(player: Player, opponent: Player):
     opponent.health -= 1
+
+
+def claw(player: Player, opponent: Player):
+    player.attack += 2
+    player.armor += 2
+
+
+# choose one effect. think about implementation
+def nourish(player: Player, opponent: Player):
+    pass
 
 
 def healing_touch(player: Player, opponent: Player):
@@ -28,6 +40,36 @@ def bite(player: Player, opponent: Player):
     player.armor += 4
 
 
+# Hunter
+
+
+def arcane_shot(player: Player, opponent: Player):
+    opponent.health -= 2
+
+
+# secrets
+def explosive_trap(player: Player, opponent: Player):
+    pass
+
+
+def freezing_trap(player: Player, opponent: Player):
+    pass
+
+
+def misdirection(player: Player, opponent: Player):
+    pass
+
+
+def snake_trap(player: Player, opponent: Player):
+    pass
+
+
+def gladiators_longbow(player: Player, opponent: Player):
+    player.weapon_durability += 2
+    player.attack += 5
+
+
+# currently-implemented cards
 card_names = ["innervate", "moonfire", "healing_touch", "wildfire_growth", "starfire"]
 
 innervate_card = Card(cost=0, effect=innervate, name="Innervate")

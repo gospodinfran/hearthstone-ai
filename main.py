@@ -8,6 +8,7 @@ class Player:
         self.armor = 0
         self.mana = 0
         self.max_mana = 0
+        self.weapon_durability = 0
         self.attack = 0
         self.hand = []
         self.played = []
