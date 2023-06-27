@@ -11,6 +11,7 @@ class Player:
         self.weapon_durability = 0
         self.attack = 0
         self.hand = []
+        self.board = [] # for minions and locations
         self.played = []
         self.deck = [moonfire_card for _ in range(30)] if deck is None else deck
 
