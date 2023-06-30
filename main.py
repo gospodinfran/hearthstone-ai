@@ -27,13 +27,15 @@ class Player:
 
 
 class Card:
-    def __init__(self, cost, effect, name="Frostbolt"):
+    def __init__(self, cost, effect, name, description):
         self.name = name
+        self.description = description
         self.mana_cost = cost
         self.effect = effect
 
     def play(self, player, opponent):
         self.effect(player, opponent)
+        print(f"Current mana: {player.mana}")
 
 
 class Game:
@@ -69,13 +71,13 @@ class Game:
         print(f"Player {index}'s turn!")
         if player.max_mana < 10:
             player.max_mana += 1
-        player.mana = player.max_mana
+        player.mana = min(30, player.max_mana)
         player.attack = 0
         player.draw()
         print(f"Player {index} has {player.mana} mana crystals.")
         print("Your hand:")
         for i, card in enumerate(player.hand):
-            print(f"{i + 1}. {card.name}")
+            print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
         print(f"Player {index} HP: ", player.health)
         print(f"Player {1 if index == 2 else 2} HP: ", opponent.health)
         print()

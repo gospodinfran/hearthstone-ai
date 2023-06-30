@@ -72,17 +72,17 @@ def gladiators_longbow(player: Player, opponent: Player):
 # currently-implemented cards
 card_names = ["innervate", "moonfire", "healing_touch", "wildfire_growth", "starfire"]
 
-innervate_card = Card(cost=0, effect=innervate, name="Innervate")
+innervate_card = Card(cost=0, effect=innervate, name="Innervate", description="Gain 2 Mana Crystals this turn only.")
 
-moonfire_card = Card(cost=0, effect=moonfire, name="Moonfire")
+moonfire_card = Card(cost=0, effect=moonfire, name="Moonfire", description="Deal 1 damage")
 
-healing_touch_card = Card(cost=3, effect=healing_touch, name="Healing Touch")
+healing_touch_card = Card(cost=3, effect=healing_touch, name="Healing Touch", description="Restore 8 Health.")
 
-wildfire_growth_card = Card(cost=2, effect=wildfire_growth, name="Wildfire Growth")
+wildfire_growth_card = Card(cost=2, effect=wildfire_growth, name="Wildfire Growth", description="Gain an empty Mana Crystal.")
 
-starfire_card = Card(cost=6, effect=starfire, name="Starfire")
+starfire_card = Card(cost=6, effect=starfire, name="Starfire", description="Deal 5 damage. Draw a card.")
 
-bite_card = Card(cost=4, effect=bite, name="Bite")
+bite_card = Card(cost=4, effect=bite, name="Bite", description="Give your hero 4 Attack this turn. Gain 4 armor.")
 
 cards = [
     innervate_card,
