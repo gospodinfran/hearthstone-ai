@@ -11,7 +11,7 @@ class Player:
         self.weapon_durability = 0
         self.attack = 0
         self.hand = []
-        self.board = [] # for minions and locations
+        self.board = [] # TODO, for minions and locations
         self.played = []
         self.deck = [moonfire_card for _ in range(30)] if deck is None else deck
 
@@ -19,8 +19,7 @@ class Player:
         for _ in range(amount):
             self.hand.append(self.deck.pop())
 
-    def play(self, card_index, opponent):
-        card: Card = self.hand[card_index]
+    def play(self, card, card_index, opponent):
         card.play(self, opponent)
         self.mana -= card.mana_cost
         self.played.append(self.hand.pop(card_index))
@@ -35,7 +34,6 @@ class Card:
 
     def play(self, player, opponent):
         self.effect(player, opponent)
-        print(f"Current mana: {player.mana}")
 
 
 class Game:
@@ -74,37 +72,35 @@ class Game:
         player.mana = min(30, player.max_mana)
         player.attack = 0
         player.draw()
-        print(f"Player {index} has {player.mana} mana crystals.")
+        print(f"Player {index} mana: {player.mana}/{player.max_mana}")
         print("Your hand:")
         for i, card in enumerate(player.hand):
             print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
         print(f"Player {index} HP: ", player.health)
         print(f"Player {1 if index == 2 else 2} HP: ", opponent.health)
-        print()
-        to_play = []
+        
         while True:
             card_index = input()
             if not card_index:
                 break
             try:
                 card_index = int(card_index) - 1
-                if 0 <= card_index < len(player.hand):
-                    to_play.append(card_index)
+
+                # play cards instantly here rather than after all input
+                if card_index < len(player.hand):
+                    card: Card = player.hand[card_index]
+                    if player.mana >= card.mana_cost:
+                        player.play(card=card, card_index=card_index, opponent=opponent)
+                print(f"Current mana: {player.mana}/{player.max_mana}")
+                # print all cards again since card indices are different
+                print("Your hand:")
+                for i, card in enumerate(player.hand):
+                    print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
+
             except ValueError:
                 print(
                     "Invalid input. Please enter a valid card index or press Enter to skip your turn."
                 )
-
-        i = 0
-        while i < len(to_play):
-            # check if the card index is still valid. important
-            if to_play[i] < len(player.hand):
-                card: Card = player.hand[to_play[i]]
-                if player.mana >= card.mana_cost:
-                    player.play(card_index=to_play[i], opponent=opponent)
-                    for j in range(i + 1, len(to_play)):
-                        to_play[j] -= 1
-            i += 1
 
     def game_over(self, p1_health, p2_health):
         if p1_health < 1:
