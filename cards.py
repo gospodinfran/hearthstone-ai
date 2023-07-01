@@ -11,8 +11,14 @@ def choose_one(effect_one, effect_two):
         choose = int(choose)
         if choose == 1:
             effect_one()
-        if choose == 2:
+        elif choose == 2:
             effect_two()
+        elif choose == 3:
+            # added following logic inside main.py:
+            # return is not enough. need to not remove the card from the hand and not remove mana from player
+            return False
+        else:
+            print("Choose a valid index.")
     except ValueError:
         print("Choose a valid index.")
 
@@ -41,7 +47,8 @@ def nourish(player: Player, opponent: Player):
         player.mana = min(player.mana + 2, 10)
     def two():
         player.draw(3)
-    choose_one(one, two)
+    if choose_one(one, two) == False:
+        return False
     
 
 

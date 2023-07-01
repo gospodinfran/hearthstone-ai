@@ -20,7 +20,9 @@ class Player:
             self.hand.append(self.deck.pop())
 
     def play(self, card, card_index, opponent):
-        card.play(self, opponent)
+        if card.play(self, opponent) == False:
+            return
+
         self.mana -= card.mana_cost
         self.played.append(self.hand.pop(card_index))
 
@@ -33,7 +35,9 @@ class Card:
         self.effect = effect
 
     def play(self, player, opponent):
-        self.effect(player, opponent)
+        if self.effect(player, opponent) is not None:
+            return False
+
 
 
 class Game:
