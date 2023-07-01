@@ -1,8 +1,24 @@
 from main import Card, Player
 import random
 
-# Druid
+# Game mechanics
+def choose_one(effect_one, effect_two):
+    print("1. Effect one.")
+    print("2. Effect two.")
+    print("3. Cancel.")
+    choose = input()
+    try:
+        choose = int(choose)
+        if choose == 1:
+            effect_one()
+        if choose == 2:
+            effect_two()
+    except ValueError:
+        print("Choose a valid index.")
 
+
+
+# Druid
 
 def innervate(player: Player, opponent: Player):
     player.mana += 2
@@ -19,7 +35,14 @@ def claw(player: Player, opponent: Player):
 
 # choose one effect. think about implementation
 def nourish(player: Player, opponent: Player):
-    pass
+    # choose one
+    def one():
+        player.max_mana += 2
+        player.mana = min(player.mana + 2, 10)
+    def two():
+        player.draw(3)
+    choose_one(one, two)
+    
 
 
 def healing_touch(player: Player, opponent: Player):
@@ -41,7 +64,6 @@ def bite(player: Player, opponent: Player):
 
 
 # Hunter
-
 
 def arcane_shot(player: Player, opponent: Player):
     opponent.health -= 2
@@ -76,6 +98,10 @@ innervate_card = Card(cost=0, effect=innervate, name="Innervate", description="G
 
 moonfire_card = Card(cost=0, effect=moonfire, name="Moonfire", description="Deal 1 damage")
 
+claw_card = Card(cost=1, effect=claw, name="Claw", description="Give your hero 2 attack this turn. Gain 2 armor.")
+
+nourish_card = Card(cost=5, effect=nourish, name="Nourish", description="Choose one - Gain 2 Mana Crystals; or Draw 3 cards.")
+
 healing_touch_card = Card(cost=3, effect=healing_touch, name="Healing Touch", description="Restore 8 Health.")
 
 wildfire_growth_card = Card(cost=2, effect=wildfire_growth, name="Wildfire Growth", description="Gain an empty Mana Crystal.")
@@ -87,6 +113,8 @@ bite_card = Card(cost=4, effect=bite, name="Bite", description="Give your hero 4
 cards = [
     innervate_card,
     moonfire_card,
+    claw_card,
+    nourish_card,
     healing_touch_card,
     wildfire_growth_card,
     starfire_card,
@@ -97,7 +125,7 @@ cards = [
 def get_random_deck():
     random_deck = []
     for card in cards:
-        for _ in range(4):
+        for _ in range(2):
             random_deck.append(card)
     random.shuffle(random_deck)
     return random_deck
