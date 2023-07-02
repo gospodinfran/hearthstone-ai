@@ -22,7 +22,16 @@ def choose_one(effect_one, effect_two):
     except ValueError:
         print("Choose a valid index.")
 
+def minion_position(player_board):
+    # 
+    pass
 
+# Card effects
+
+# Neutral
+
+def wisp(player: Player, opponent: Player):
+    player.board
 
 # Druid
 

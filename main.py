@@ -1,5 +1,5 @@
 from cards import *
-
+from DLLboard import *
 
 class Player:
     def __init__(self, deck=None, renathal=False):
@@ -10,9 +10,9 @@ class Player:
         self.max_mana = 0
         self.weapon_durability = 0
         self.attack = 0
-        self.hand = []
-        self.board = [] # TODO, for minions and locations
-        self.played = []
+        self.hand = [] # array where order matters, dict where order doesn't matter
+        self.board = DoublyLinkedList() # minions and locations
+        self.played = {}
         self.deck = [moonfire_card for _ in range(30)] if deck is None else deck
 
     def draw(self, amount=1):
@@ -24,7 +24,9 @@ class Player:
             return
 
         self.mana -= card.mana_cost
-        self.played.append(self.hand.pop(card_index))
+        popped_card:Card = self.hand.pop(card_index)
+        popped_name = popped_card.name
+        self.played[popped_name] = self.played.get(popped_name, 0) + 1
 
 
 class Card:
