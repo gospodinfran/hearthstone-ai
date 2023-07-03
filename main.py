@@ -1,5 +1,4 @@
 from cards import *
-from DLLboard import *
 
 class Player:
     def __init__(self, deck=None, renathal=False):
@@ -11,7 +10,7 @@ class Player:
         self.weapon_durability = 0
         self.attack = 0
         self.hand = [] # array where order matters, dict where order doesn't matter
-        self.board = DoublyLinkedList() # minions and locations
+        self.board = [] # minions and locations. array is good enough. O(1)
         self.played = {}
         self.deck = [moonfire_card for _ in range(30)] if deck is None else deck
 

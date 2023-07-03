@@ -23,7 +23,6 @@ def choose_one(effect_one, effect_two):
         print("Choose a valid index.")
 
 def minion_position(player_board):
-    # 
     pass
 
 # Card effects
@@ -31,7 +30,7 @@ def minion_position(player_board):
 # Neutral
 
 def wisp(player: Player, opponent: Player):
-    player.board
+    pass
 
 # Druid
 
