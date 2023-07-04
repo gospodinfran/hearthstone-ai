@@ -8,6 +8,7 @@ class Player:
         self.armor = 0
         self.mana = 0
         self.max_mana = 0
+        self.weapon = None
         self.weapon_durability = 0
         self.attack = 0
         self.fatigue = 0
@@ -71,7 +72,7 @@ class Minion(Card):
             pos = input()
             try:
                 pos = int(pos)
-                player.board.insert(pos, self)
+                player.board.insert(pos - 1, self)
             except ValueError:
                 print("no bueno")
 
@@ -152,8 +153,8 @@ class Game:
                 )
 
     def print_board(self):
-        print(f"Player1 board: {''.join(card.name for card in self.player1.board)}")
-        print(f"Player2 board: {''.join(card.name for card in self.player2.board)}")
+        print(f"Player1 board: {', '.join(card.name for card in self.player1.board)}")
+        print(f"Player2 board: {', '.join(card.name for card in self.player2.board)}")
 
     def game_over(self, p1_health, p2_health):
         if p1_health < 1:

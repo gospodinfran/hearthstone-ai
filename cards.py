@@ -27,6 +27,14 @@ def choose_one(effect_one, effect_two):
 def minion_no_effect(player: Player, opponent: Player):
     pass
 
+# Battlecries
+
+def bloodsail_corsair(player: Player, opponent: Player):
+    if opponent.weapon is not None:
+        opponent.weapon_durability -= 1
+        if opponent.weapon_durability == 0:
+            opponent.weapon = None
+
 # Druid
 
 def innervate(player: Player, opponent: Player):
@@ -124,6 +132,10 @@ bite_card = Card(cost=4, effect=bite, name="Bite", description="Give your hero 4
 
 wisp_card = Minion(cost=0, attack=1, health=1, effect=minion_no_effect, name="Wisp", description="")
 
+murloc_raider_card = Minion(cost=1, attack=2, health=1, effect=minion_no_effect, name="Murloc Raider", description="")
+
+bloodsail_corsair_card = Minion(cost=1, attack=1, health=2, effect=bloodsail_corsair, name="Bloodsail Corsair", description="")
+
 cards = [
     innervate_card,
     moonfire_card,
@@ -133,11 +145,15 @@ cards = [
     wildfire_growth_card,
     starfire_card,
     bite_card,
-    wisp_card
+    wisp_card,
+    murloc_raider_card,
+    bloodsail_corsair_card
 ]
 
 neutral_cards = [
-    wisp_card
+    wisp_card,
+    murloc_raider_card,
+    bloodsail_corsair_card
 ]
 
 def get_random_deck():
