@@ -1,4 +1,5 @@
 from cards import *
+from typing import List, Dict
 
 class Player:
     def __init__(self, deck=None, renathal=False):
@@ -9,14 +10,22 @@ class Player:
         self.max_mana = 0
         self.weapon_durability = 0
         self.attack = 0
-        self.hand = [] # array where order matters, dict where order doesn't matter
-        self.board = [] # minions and locations. array is good enough. O(1)
-        self.played = {}
-        self.deck = [moonfire_card for _ in range(30)] if deck is None else deck
+        self.fatigue = 0
+        self.hand: List[Card] = []
+        self.board: List[Card] = [] # minions and locations. array is good enough. O(1) time
+        self.played: Dict[Card] = {}
+        self.deck: List[Card] = [moonfire_card for _ in range(30)] if deck is None else deck
 
     def draw(self, amount=1):
-        for _ in range(amount):
-            self.hand.append(self.deck.pop())
+        if self.deck:
+            for _ in range(amount):
+                if len(self.hand) < 10:
+                    self.hand.append(self.deck.pop())
+                else:
+                    self.deck.pop()
+        else:
+            self.fatigue += 1
+            self.health -= self.fatigue
 
     def play(self, card, card_index, opponent):
         if card.play(self, opponent) == False:
@@ -48,10 +57,23 @@ class Minion(Card):
     def play(self, player: Player, opponent: Player):
         super().play(player, opponent)
         # TODO: implement logic for placing minions on left or right of existing minions
-        player.board.append(self)
-        
+        # TODO: cannot play if boardsize is 7
+        if not player.board:
+            player.board.append(self)
+        else:
+            print("Choose where to play the minion.")
+            n_possible = min(7, len(player.board) + 1 )
+            board_copy: List[Card] = player.board
+            for i in range(n_possible - 1):
+                print(i + 1, board_copy[i].name, end=" ")
+            print(n_possible)
 
-
+            pos = input()
+            try:
+                pos = int(pos)
+                player.board.insert(pos, self)
+            except ValueError:
+                print("no bueno")
 
 class Game:
     def __init__(self, p1_deck=None, p2_deck=None):
@@ -111,12 +133,18 @@ class Game:
                     card: Card = player.hand[card_index]
                     if player.mana >= card.mana_cost:
                         player.play(card=card, card_index=card_index, opponent=opponent)
-                print(f"Current mana: {player.mana}/{player.max_mana}")
-                # print all cards again since card indices are different
-                print("Your hand:")
-                for i, card in enumerate(player.hand):
-                    print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
-                self.print_board()
+                        print(f"Current mana: {player.mana}/{player.max_mana}")
+                        # print all cards again since card indices are different
+                        print("Your hand:")
+                        for i, card in enumerate(player.hand):
+                            print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
+                        self.print_board()
+                    else:
+                        print("Not enough mana.")
+                else:
+                    print("Not a valid card index.")
+
+                
 
             except ValueError:
                 print(
