@@ -1,4 +1,4 @@
-from main import Card, Player
+from main import Card, Minion, Player
 import random
 
 # Game mechanics
@@ -22,14 +22,9 @@ def choose_one(effect_one, effect_two):
     except ValueError:
         print("Choose a valid index.")
 
-def minion_position(player_board):
-    pass
-
 # Card effects
 
-# Neutral
-
-def wisp(player: Player, opponent: Player):
+def minion_no_effect(player: Player, opponent: Player):
     pass
 
 # Druid
@@ -125,6 +120,10 @@ starfire_card = Card(cost=6, effect=starfire, name="Starfire", description="Deal
 
 bite_card = Card(cost=4, effect=bite, name="Bite", description="Give your hero 4 Attack this turn. Gain 4 armor.")
 
+# neutrals
+
+wisp_card = Minion(cost=0, attack=1, health=1, effect=minion_no_effect, name="Wisp", description="")
+
 cards = [
     innervate_card,
     moonfire_card,
@@ -134,8 +133,12 @@ cards = [
     wildfire_growth_card,
     starfire_card,
     bite_card,
+    wisp_card
 ]
 
+neutral_cards = [
+    wisp_card
+]
 
 def get_random_deck():
     random_deck = []

@@ -33,11 +33,23 @@ class Card:
         self.name = name
         self.description = description
         self.mana_cost = cost
-        self.effect = effect
+        self.effect = effect # effect for minions would be battlecry (it needs to survive to activate though)
 
     def play(self, player, opponent):
         if self.effect(player, opponent) is not None:
             return False
+    
+class Minion(Card):
+    def __init__(self, cost, attack, health, effect, name, description):
+        super().__init__(cost, effect, name, description)
+        self.attack = attack
+        self.health = health
+    
+    def play(self, player: Player, opponent: Player):
+        super().play(player, opponent)
+        # TODO: implement logic for placing minions on left or right of existing minions
+        player.board.append(self)
+        
 
 
 
@@ -77,10 +89,13 @@ class Game:
         player.mana = min(30, player.max_mana)
         player.attack = 0
         player.draw()
+
+        # printing for debugging 
         print(f"Player {index} mana: {player.mana}/{player.max_mana}")
         print("Your hand:")
         for i, card in enumerate(player.hand):
             print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
+        self.print_board()
         print(f"Player {index} HP: ", player.health)
         print(f"Player {1 if index == 2 else 2} HP: ", opponent.health)
         
@@ -101,11 +116,16 @@ class Game:
                 print("Your hand:")
                 for i, card in enumerate(player.hand):
                     print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
+                self.print_board()
 
             except ValueError:
                 print(
                     "Invalid input. Please enter a valid card index or press Enter to skip your turn."
                 )
+
+    def print_board(self):
+        print(f"Player1 board: {''.join(card.name for card in self.player1.board)}")
+        print(f"Player2 board: {''.join(card.name for card in self.player2.board)}")
 
     def game_over(self, p1_health, p2_health):
         if p1_health < 1:
