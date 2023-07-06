@@ -1,6 +1,8 @@
 from main import Card, Minion, Player
 import random
 
+# TODO, add targeting: opponent, minions, etc. Currently cards thats should target go face.
+
 # Game mechanics
 def choose_one(effect_one, effect_two):
     print("1. Effect one.")
@@ -14,8 +16,7 @@ def choose_one(effect_one, effect_two):
         elif choose == 2:
             effect_two()
         elif choose == 3:
-            # added following logic inside main.py:
-            # return is not enough. need to not remove the card from the hand and not remove mana from player
+            # returning False means the card was not played
             return False
         else:
             print("Choose a valid index.")
@@ -27,13 +28,33 @@ def choose_one(effect_one, effect_two):
 def minion_no_effect(player: Player, opponent: Player):
     pass
 
-# Battlecries
+
+# Battlecry effects
 
 def bloodsail_corsair(player: Player, opponent: Player):
     if opponent.weapon is not None:
         opponent.weapon_durability -= 1
         if opponent.weapon_durability == 0:
             opponent.weapon = None
+
+def abusive_sergeant(player: Player, opponent: Player):
+    pass
+
+def elven_archer(player: Player, opponent: Player):
+    pass
+
+def hungry_crab(player, opponent):
+    pass
+
+def voodoo_doctor(player, opponent):
+    pass
+
+def acidic_swamp_ooze(player: Player, opponent: Player):
+    opponent.weapon = None
+    opponent.weapon_durability = 0
+
+def bloodsail_raider(player: Player, opponent: Player):
+    pass
 
 # Druid
 
@@ -49,10 +70,8 @@ def claw(player: Player, opponent: Player):
     player.attack += 2
     player.armor += 2
 
-
-# choose one effect. think about implementation
+# Choose one effects
 def nourish(player: Player, opponent: Player):
-    # choose one
     def one():
         player.max_mana += 2
         player.mana = min(player.mana + 2, 10)
@@ -60,7 +79,6 @@ def nourish(player: Player, opponent: Player):
         player.draw(3)
     if choose_one(one, two) == False:
         return False
-    
 
 
 def healing_touch(player: Player, opponent: Player):
@@ -105,7 +123,7 @@ def snake_trap(player: Player, opponent: Player):
 
 
 def gladiators_longbow(player: Player, opponent: Player):
-    player.weapon_durability += 2
+    player.weapon_durability = 2
     player.attack += 5
 
 
@@ -128,13 +146,46 @@ starfire_card = Card(cost=6, effect=starfire, name="Starfire", description="Deal
 
 bite_card = Card(cost=4, effect=bite, name="Bite", description="Give your hero 4 Attack this turn. Gain 4 armor.")
 
-# neutrals
+# Neutrals
+# No card text
 
 wisp_card = Minion(cost=0, attack=1, health=1, effect=minion_no_effect, name="Wisp", description="")
 
 murloc_raider_card = Minion(cost=1, attack=2, health=1, effect=minion_no_effect, name="Murloc Raider", description="")
 
+bloodfen_raptor_card = Minion(cost=2, attack=3, health=2, effect=minion_no_effect, name="Bloodfen Raptor", description="")
+
+river_crocolisk_card = Minion(cost=2, attack=2, health=3, effect=minion_no_effect, name="River Crocolisk", description="")
+
+magma_rager_card = Minion(cost=3, attack=5, health=1, effect=minion_no_effect, name="Magma Rager", description="")
+
+chillwind_yeti_card = Minion(cost=4, attack=4, health=5, effect=minion_no_effect, name="Chillwind Yeti", description="")
+
+oasis_snapjaw_card = Minion(cost=4, attack=2, health=7, effect=minion_no_effect, name="Oasis Snapjaw", description="")
+
+boulderfirst_ogre = Minion(cost=6, attack=6, health=7, effect=minion_no_effect, name="Boulderfirst Ogre", description="")
+
+core_hound_card = Minion(cost=7, attack=9, health=5, effect=minion_no_effect, name="Core Hound", description="")
+
+war_golem_card = Minion(cost=7, attack=7, health=7, effect=minion_no_effect, name="War Golem", description="")
+
+# Battlecry
+
+# TODO, battlecry effect targeting
+abusive_sergeant_card = Minion(cost=1, attack=2, health=1, effect=abusive_sergeant, name="Abusive Sergeant", description="Battlecry: Give a minion +2 Attack this turn.") 
+
 bloodsail_corsair_card = Minion(cost=1, attack=1, health=2, effect=bloodsail_corsair, name="Bloodsail Corsair", description="")
+
+elven_archer_card = Minion(cost=1, attack=1, health=1, effect=elven_archer, name="Elven Archer", description="Battlecry: Deal 1 damage.")
+
+hungry_crab_card = Minion(cost=1, attack=1, health=2, effect=hungry_crab, name="Hungry Crab", description="Battlecry: Destroy a Murloc and gain +2/+2.")
+
+voodoo_doctor_card = Minion(cost=1, attack=2, health=1, effect=voodoo_doctor, name="Voodoo Doctor", description="Battlecry: Restore 2 Health.")
+
+acidic_swamp_ooze_card = Minion(cost=2, attack=3, health=2, effect=acidic_swamp_ooze, name="Acidic Swamp Ooze", description="Battlecry: Destroy your opponent's weapon.")
+
+bloodsail_raider_card = Minion(cost=2, attack=2, health=3, effect=elven_archer, name="Bloodsail Raider", description="Battlecry: Gain Attack equal to the Attack of your weapon.")
+
 
 cards = [
     innervate_card,
@@ -147,19 +198,29 @@ cards = [
     bite_card,
     wisp_card,
     murloc_raider_card,
-    bloodsail_corsair_card
+    bloodsail_corsair_card,
+    bloodfen_raptor_card,
+    river_crocolisk_card,
+    magma_rager_card,
+    chillwind_yeti_card,
+    oasis_snapjaw_card,
+    boulderfirst_ogre,
+    core_hound_card,
+    war_golem_card,
+    acidic_swamp_ooze_card
 ]
 
-neutral_cards = [
-    wisp_card,
-    murloc_raider_card,
-    bloodsail_corsair_card
+incomplete_cards = [
+    abusive_sergeant_card,
+    elven_archer_card,
+    hungry_crab_card,
+    voodoo_doctor_card
 ]
 
 def get_random_deck():
-    random_deck = []
+    deck = []
     for card in cards:
         for _ in range(2):
-            random_deck.append(card)
-    random.shuffle(random_deck)
-    return random_deck
+            deck.append(card)
+    random.shuffle(deck)
+    return deck

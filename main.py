@@ -29,6 +29,7 @@ class Player:
             self.health -= self.fatigue
 
     def play(self, card, card_index, opponent):
+        # TODO, pass down card for effects like enrage, bloodsail raider, etc.
         if card.play(self, opponent) == False:
             return
 
@@ -57,7 +58,6 @@ class Minion(Card):
     
     def play(self, player: Player, opponent: Player):
         super().play(player, opponent)
-        # TODO: implement logic for placing minions on left or right of existing minions
         # TODO: cannot play if boardsize is 7
         if not player.board:
             player.board.append(self)
@@ -109,7 +109,7 @@ class Game:
         print(f"Player {index}'s turn!")
         if player.max_mana < 10:
             player.max_mana += 1
-        player.mana = min(30, player.max_mana)
+        player.mana = min(10, player.max_mana)
         player.attack = 0
         player.draw()
 
@@ -117,7 +117,7 @@ class Game:
         print(f"Player {index} mana: {player.mana}/{player.max_mana}")
         print("Your hand:")
         for i, card in enumerate(player.hand):
-            print(f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
+            print(f"{i + 1}. {card.name}, {card.mana_cost} Mana. {card.description}")
         self.print_board()
         print(f"Player {index} HP: ", player.health)
         print(f"Player {1 if index == 2 else 2} HP: ", opponent.health)
