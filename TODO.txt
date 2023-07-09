@@ -1,1 +1,1 @@
-Minions, Secrets, Choose One effect
+Secrets, minion effects such as deathrattle, enrage, etc.
