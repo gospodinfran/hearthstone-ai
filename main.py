@@ -15,6 +15,7 @@ class Player:
         self.hand: List[Card] = []
         self.board: List[Card] = [] # minions and locations. array is good enough. O(1) time
         self.played: Dict[Card] = {}
+        self.destroyed: Dict[Card] = {}
         self.deck: List[Card] = [moonfire_card for _ in range(30)] if deck is None else deck
 
     def draw(self, amount=1):
@@ -46,7 +47,8 @@ class Card:
         self.mana_cost = cost
         self.effect = effect # effect for minions would be battlecry (it needs to survive to activate though)
 
-    def play(self, player, opponent):
+    def play(self, player: Player, opponent: Player):
+        player.played[self.name] = player.played.get(self.name, 0) + 1
         if self.effect(player, opponent) is not None:
             return False
     
@@ -113,7 +115,7 @@ class Game:
         player.attack = 0
         player.draw()
 
-        # printing for debugging 
+        # printing for debugging/interface
         print(f"Player {index} mana: {player.mana}/{player.max_mana}")
         print("Your hand:")
         for i, card in enumerate(player.hand):

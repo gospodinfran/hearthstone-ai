@@ -1,4 +1,5 @@
 from main import Card, Minion, Player
+from typing import Union
 import random
 
 # TODO, add targeting: opponent, minions, etc. Currently cards thats should target go face.
@@ -22,6 +23,31 @@ def choose_one(effect_one, effect_two):
             print("Choose a valid index.")
     except ValueError:
         print("Choose a valid index.")
+
+def choose_target_enemy(player: Player, opponent: Player):
+    print("0. Opponent")
+    for i, minion in enumerate(opponent.board):
+        print(i + 1, minion.name)
+    print(len(opponent.board) + 1, "Cancel")
+
+    # TODO: implement cancel
+
+    valid = False
+    while not valid:
+        index = int(input())
+        if index == 0:
+            return opponent
+        if 0 < index <= len(opponent.board): 
+            valid = True
+            return opponent.board[index - 1]
+
+def destroyed_check_enemy(player: Player, opponent: Player, target: Union[Player, Minion]):
+    if isinstance(target, Minion):
+        if target.health == 0:
+            index = opponent.board.index(target)
+            opponent.board.pop(index)
+            opponent.destroyed[target.name] = opponent.destroyed.get(target.name, 0) + 1
+
 
 # Card effects
 
@@ -63,7 +89,9 @@ def innervate(player: Player, opponent: Player):
 
 
 def moonfire(player: Player, opponent: Player):
-    opponent.health -= 1
+    target = choose_target_enemy(player=player, opponent=opponent)
+    target.health -= 1
+    destroyed_check_enemy(player, opponent, target)
 
 
 def claw(player: Player, opponent: Player):
