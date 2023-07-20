@@ -1,1 +1,1 @@
-Secrets, minion effects such as deathrattle, enrage, etc.
+Add class hero powers
