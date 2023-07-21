@@ -25,15 +25,15 @@ class Player:
             moonfire_card for _ in range(30)] if deck is None else deck
 
     def draw(self, amount=1):
-        if self.deck:
-            for _ in range(amount):
+        for _ in range(amount):
+            if self.deck:
                 if len(self.hand) < 10:
                     self.hand.append(self.deck.pop())
                 else:
                     self.deck.pop()
-        else:
-            self.fatigue += 1
-            self.health -= self.fatigue
+            else:
+                self.fatigue += 1
+                self.health -= self.fatigue
 
     def play(self, card, card_index, opponent):
         # TODO, pass down card for effects like enrage, bloodsail raider, etc.
@@ -83,7 +83,6 @@ class Minion(Card):
 
     def play(self, player: Player, opponent: Player):
         super().play(player, opponent)
-        # TODO: cannot play if boardsize is 7
         if not player.board:
             player.board.append(self)
         else:
