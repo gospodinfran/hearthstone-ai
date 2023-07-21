@@ -3,15 +3,10 @@ from typing import List, Dict
 
 
 class HeroClass():
-    def use_hero_power(self, player):
-        raise NotImplementedError("This method should be overriden.")
-
-
-class Mage(HeroClass):
-    def use_hero_power(self, player, target=None):
+    def use_hero_power(self, player=None, opponent=None, target=None):
         if player.hero_power:
             if player.mana >= 2:
-                target.health -= 1
+                self.use_power(player, opponent, target)
                 player.hero_power = False
                 print("Hero power used.")
                 return True
@@ -20,9 +15,67 @@ class Mage(HeroClass):
         else:
             print("Hero power already used.")
 
+    def use_power(self, player=None, opponent=None, target=None):
+        raise NotImplementedError("This method should be overriden.")
+
+
+class Mage(HeroClass):
+    def use_power(self, player, opponent, target):
+        target.health -= 1
+
+
+class Warrior(HeroClass):
+    def use_power(self, player, opponent, target):
+        player.armor += 2
+
+
+class Priest(HeroClass):
+    def use_power(self, player, opponent, target):
+        # TODO, implement base stats for all minions because heals can't go over base health
+        if isinstance(target, Player):
+            target.health = min(target.max_health, target.health + 2)
+
+
+class Hunter(HeroClass):
+    def use_power(self, player, opponent, target):
+        opponent.health -= 2
+
+
+class Paladin(HeroClass):
+    def use_power(self, player: Player, opponent, target):
+        if len(player.board) < 7:
+            player.board.append(silver_hand_recruit)
+
+
+class Druid(HeroClass):
+    def use_power(self, player: Player, opponent: Player, target):
+        player.armor += 1
+        player.attack += 1
+
+
+class Rogue(HeroClass):
+    def use_power(self, player: Player, opponent: Player, target):
+        player.attack = 1
+        player.weapon_durability = 2
+        player.weapon = True
+
+
+class Shaman(HeroClass):
+    def use_power(self, player: Player, opponent: Player, target):
+        if len(player.board) < 7:
+            # TODO, implement all 4 shaman token hero power minions
+            # silver hand recruit as placeholder
+            player.board.append(silver_hand_recruit)
+
+
+class Warlock(HeroClass):
+    def use_power(self, player: Player, opponent: Player, target):
+        player.health -= 2
+        player.draw()
+
 
 class Player:
-    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Mage()):
+    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Priest()):
         self.health: int = 35 if renathal else 30
         self.max_health: int = 35 if renathal else 30
         self.hero_class: HeroClass = hero_class
@@ -64,8 +117,8 @@ class Player:
         popped_name = popped_card.name
         self.played[popped_name] = self.played.get(popped_name, 0) + 1
 
-    def use_hero_power(self, target=None):
-        self.hero_class.use_hero_power(self, target)
+    def use_hero_power(self, player=None, opponent=None, target=None):
+        self.hero_class.use_hero_power(self, opponent, target)
 
 
 class Card:
@@ -128,14 +181,14 @@ class Game:
         while not game_end:
             self.turn(player=self.player1, index=1, opponent=self.player2)
 
-            game_end, winner = self.game_over(
+            game_end, winner = self.is_game_over(
                 self.player1.health, self.player2.health)
             if game_end:
                 return winner
 
             self.turn(player=self.player2, index=2, opponent=self.player1)
 
-            game_end, winner = self.game_over(
+            game_end, winner = self.is_game_over(
                 self.player1.health, self.player2.health)
             if game_end:
                 return winner
@@ -169,10 +222,18 @@ class Game:
 
                 if card_index == -1:
                     if player.mana >= 2:
-                        target = choose_target_enemy(player, opponent)
-                        if player.use_hero_power(
-                                target=target):
+                        target = None
+                        if isinstance(player.hero_class, Mage):
+                            target = choose_target_enemy(player, opponent)
+                        if isinstance(player.hero_class, Priest):
+                            # TODO, allow targeting of own units, not just enemy via choose_target_enemy
+                            # This is placeholder until then. Heals self
+                            target = player
+
+                        if player.use_hero_power(player=player, opponent=opponent,
+                                                 target=target):
                             destroyed_check_enemy(player, opponent, target)
+                            self.is_game_over(player.health, opponent.health)
                             self.print_hand(player)
                             self.print_board()
                     else:
@@ -238,7 +299,7 @@ class Game:
         if player.attack > 0:
             print("11. Attack with hero.")
 
-    def game_over(self, p1_health, p2_health):
+    def is_game_over(self, p1_health, p2_health):
         if p1_health < 1:
             print("Player 2 wins!")
             return True, "Player2"

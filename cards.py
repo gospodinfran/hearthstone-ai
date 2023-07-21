@@ -34,8 +34,6 @@ def choose_target_enemy(player: Player, opponent: Player):
     for i, minion in enumerate(opponent.board):
         print(i + 1, minion.name)
 
-    # TODO: don't actually need the ability to cancel
-
     valid = False
     while not valid:
         index = int(input())
@@ -212,6 +210,11 @@ bite_card = Card(cost=4, effect=bite, name="Bite",
 
 starfire_card = Card(cost=6, effect=starfire, name="Starfire",
                      description="Deal 5 damage. Draw a card.")
+
+# Paladin
+
+silver_hand_recruit = Minion(cost=1, attack=1, health=1,
+                             effect=minion_no_effect, name="Silver Hand Recruit", description="")
 
 # Neutrals
 # No card text
