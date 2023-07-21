@@ -289,7 +289,9 @@ cards = [
     boulderfirst_ogre,
     core_hound_card,
     war_golem_card,
-    acidic_swamp_ooze_card
+    acidic_swamp_ooze_card,
+    eaglehorn_bow_card,
+    gladiators_longbow_card,
 ]
 
 incomplete_cards = [

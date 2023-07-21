@@ -13,6 +13,7 @@ class Player:
         self.max_mana = 0
         self.weapon = None
         self.weapon_durability = 0
+        self.attacked = False
         self.attack = 0
         self.fatigue = 0
         self.hand: List[Card] = []
@@ -88,9 +89,8 @@ class Minion(Card):
         else:
             print("Choose where to play the minion.")
             n_possible = min(7, len(player.board) + 1)
-            board_copy: List[Card] = player.board
             for i in range(n_possible - 1):
-                print(i + 1, board_copy[i].name, end=" ")
+                print(i + 1, player.board[i].name, end=" ")
             print(n_possible)
 
             pos = input()
@@ -162,26 +162,34 @@ class Game:
                 # play cards instantly here rather than after all input
 
                 if card_index == -1:
-                    target = choose_target_enemy(player, opponent)
-                    if player.use_hero_power(
-                            target=target):
-                        destroyed_check_enemy(player, opponent, target)
-                        self.print_hand(player)
-                        self.print_board()
+                    if player.mana >= 2:
+                        target = choose_target_enemy(player, opponent)
+                        if player.use_hero_power(
+                                target=target):
+                            destroyed_check_enemy(player, opponent, target)
+                            self.print_hand(player)
+                            self.print_board()
+                    else:
+                        print("Not enough mana.")
                 elif card_index == 10:
-                    if player.attack > 0:
+                    if player.attack > 0 and not player.attacked:
                         target = choose_target_enemy(player, opponent)
                         if isinstance(target, Minion):
                             player.health -= target.attack
                         target.health -= player.attack
                         player.weapon_durability = max(
                             0, player.weapon_durability - 1)
+                        player.attacked = True
                         self.print_hand(player)
                         self.print_board()
+                        print(
+                            f"Player {index} HP: {player.health} ({player.armor} Armor)")
+                        print(
+                            f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
 
                     else:
                         print(
-                            "Your hero doesn't have any attack or a weapon equipped.")
+                            "You already attacked.")
                     pass
                 elif 0 <= card_index < len(player.hand):
                     card: Card = player.hand[card_index]
@@ -214,8 +222,8 @@ class Game:
         print("-------------------------------------------------")
 
     def print_hand(self, player: Player):
-        print(f"0. Hero Power {int(player.hero_power)}/1")
         print("Hand:")
+        print(f"0. Hero Power {int(player.hero_power)}/1")
         for i, card in enumerate(player.hand):
             print(
                 f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
