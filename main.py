@@ -2,20 +2,39 @@ from cards import *
 from typing import List, Dict
 
 
+class HeroClass():
+    def use_hero_power(self, player):
+        raise NotImplementedError("This method should be overriden.")
+
+
+class Mage(HeroClass):
+    def use_hero_power(self, player, target=None):
+        if player.hero_power:
+            if player.mana >= 2:
+                target.health -= 1
+                player.hero_power = False
+                print("Hero power used.")
+                return True
+            else:
+                print("Not enough mana.")
+        else:
+            print("Hero power already used.")
+
+
 class Player:
-    def __init__(self, deck=None, renathal=False, hero_class="mage"):
-        self.health = 35 if renathal else 30
-        self.max_health = 35 if renathal else 30
-        self.hero_class = hero_class
-        self.hero_power = True
-        self.armor = 0
-        self.mana = 0
-        self.max_mana = 0
-        self.weapon = None
-        self.weapon_durability = 0
-        self.attacked = False
-        self.attack = 0
-        self.fatigue = 0
+    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Mage()):
+        self.health: int = 35 if renathal else 30
+        self.max_health: int = 35 if renathal else 30
+        self.hero_class: HeroClass = hero_class
+        self.hero_power: bool = True
+        self.armor: int = 0
+        self.mana: int = 0
+        self.max_mana: int = 0
+        self.weapon: bool = False
+        self.weapon_durability: int = 0
+        self.attacked: bool = False
+        self.attack: int = 0
+        self.fatigue: int = 0
         self.hand: List[Card] = []
         # minions and locations. array is good enough. O(1) time
         self.board: List[Card] = []
@@ -46,19 +65,7 @@ class Player:
         self.played[popped_name] = self.played.get(popped_name, 0) + 1
 
     def use_hero_power(self, target=None):
-        # TODO
-        if self.hero_power:
-            if self.mana >= 2:
-                if self.hero_class == "mage":
-                    target.health -= 1
-                self.hero_power = False
-                print("Hero power used.")
-                return True
-            else:
-                print("Not enough mana.")
-        else:
-            print("Hero power already used.")
-        return
+        self.hero_class.use_hero_power(self, target)
 
 
 class Card:
@@ -178,6 +185,8 @@ class Game:
                         target.health -= player.attack
                         player.weapon_durability = max(
                             0, player.weapon_durability - 1)
+                        if player.weapon_durability == 0:
+                            player.weapon == False
                         player.attacked = True
                         self.print_hand(player)
                         self.print_board()

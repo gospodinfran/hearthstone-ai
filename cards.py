@@ -64,10 +64,10 @@ def minion_no_effect(player: Player, opponent: Player):
 # Battlecry effects
 
 def bloodsail_corsair(player: Player, opponent: Player):
-    if opponent.weapon is not None:
+    if opponent.weapon:
         opponent.weapon_durability -= 1
         if opponent.weapon_durability == 0:
-            opponent.weapon = None
+            opponent.weapon = False
 
 
 def abusive_sergeant(player: Player, opponent: Player):
@@ -169,11 +169,13 @@ def snake_trap(player, opponent):
 def eaglehorn_bow(player: Player, opponent):
     player.weapon_durability = 2
     player.attack = 3
+    player.weapon = True
 
 
 def gladiators_longbow(player: Player, opponent: Player):
     player.weapon_durability = 2
     player.attack = 5
+    player.weapon = True
 
 
 coin_card = Card(cost=0, effect=coin_effect, name="The Coin",
