@@ -2,6 +2,10 @@ from main import Card, Minion, Player
 from typing import Union
 import random
 
+
+def coin_effect(player: Player, opponent):
+    player.mana = min(10, player.mana + 1)
+
 # Game mechanics
 
 
@@ -94,7 +98,7 @@ def bloodsail_raider(player: Player, opponent: Player):
 
 
 def innervate(player: Player, opponent: Player):
-    player.mana += 2
+    player.mana = min(10, player.mana + 2)
 
 
 def moonfire(player: Player, opponent: Player):
@@ -106,8 +110,6 @@ def moonfire(player: Player, opponent: Player):
 def claw(player: Player, opponent: Player):
     player.attack += 2
     player.armor += 2
-
-# Choose one effects
 
 
 def nourish(player: Player, opponent: Player):
@@ -141,41 +143,55 @@ def bite(player: Player, opponent: Player):
 
 # Hunter
 
-def arcane_shot(player: Player, opponent: Player):
+def arcane_shot(player, opponent):
     opponent.health -= 2
 
 
 # secrets
-def explosive_trap(player: Player, opponent: Player):
+def explosive_trap(player, opponent):
     pass
 
 
-def freezing_trap(player: Player, opponent: Player):
+def freezing_trap(player, opponent):
     pass
 
 
-def misdirection(player: Player, opponent: Player):
+def misdirection(player, opponent):
     pass
 
 
-def snake_trap(player: Player, opponent: Player):
+def snake_trap(player, opponent):
     pass
+
+# logic for the following two weapons is incomplete. card text not implemented yet.
+
+
+def eaglehorn_bow(player: Player, opponent):
+    player.weapon_durability = 2
+    player.attack = 3
 
 
 def gladiators_longbow(player: Player, opponent: Player):
     player.weapon_durability = 2
-    player.attack += 5
+    player.attack = 5
 
 
-# currently-implemented cards
-card_names = ["innervate", "moonfire",
-              "healing_touch", "wildfire_growth", "starfire"]
+coin_card = Card(cost=0, effect=coin_effect, name="The Coin",
+                 description="Gain 1 Mana Crystal this turn only.")
+
+# Druid class
 
 innervate_card = Card(cost=0, effect=innervate, name="Innervate",
                       description="Gain 2 Mana Crystals this turn only.")
 
 moonfire_card = Card(cost=0, effect=moonfire,
                      name="Moonfire", description="Deal 1 damage")
+
+eaglehorn_bow_card = Card(cost=3, effect=eaglehorn_bow,
+                          name="Eaglehorn Bow", description="")
+
+gladiators_longbow_card = Card(
+    cost=7, effect=gladiators_longbow, name="Gladiator's Longbow", description="")
 
 claw_card = Card(cost=1, effect=claw, name="Claw",
                  description="Give your hero 2 attack this turn. Gain 2 armor.")
@@ -189,11 +205,11 @@ healing_touch_card = Card(cost=3, effect=healing_touch,
 wildfire_growth_card = Card(cost=2, effect=wildfire_growth,
                             name="Wildfire Growth", description="Gain an empty Mana Crystal.")
 
-starfire_card = Card(cost=6, effect=starfire, name="Starfire",
-                     description="Deal 5 damage. Draw a card.")
-
 bite_card = Card(cost=4, effect=bite, name="Bite",
                  description="Give your hero 4 Attack this turn. Gain 4 armor.")
+
+starfire_card = Card(cost=6, effect=starfire, name="Starfire",
+                     description="Deal 5 damage. Draw a card.")
 
 # Neutrals
 # No card text

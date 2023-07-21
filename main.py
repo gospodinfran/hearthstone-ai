@@ -3,7 +3,7 @@ from typing import List, Dict
 
 
 class Player:
-    def __init__(self, deck=None, renathal=False, hero_class="Mage"):
+    def __init__(self, deck=None, renathal=False, hero_class="mage"):
         self.health = 35 if renathal else 30
         self.max_health = 35 if renathal else 30
         self.hero_class = hero_class
@@ -44,12 +44,15 @@ class Player:
         popped_name = popped_card.name
         self.played[popped_name] = self.played.get(popped_name, 0) + 1
 
-    def use_hero_power(self):
+    def use_hero_power(self, target=None):
         # TODO
         if self.hero_power:
             if self.mana >= 2:
+                if self.hero_class == "mage":
+                    target.health -= 1
                 self.hero_power = False
                 print("Hero power used.")
+                return True
             else:
                 print("Not enough mana.")
         else:
@@ -109,10 +112,12 @@ class Game:
         game_end = False
         self.player1.draw(3)
         self.player2.draw(4)
+        self.player2.hand.append(coin_card)
 
         print(
             "Enter the card index of the cards you want to play one by one. ORDER MATTERS."
         )
+        print("-------------------------------------------------")
 
         while not game_end:
             self.turn(player=self.player1, index=1, opponent=self.player2)
@@ -143,8 +148,9 @@ class Game:
         print(f"Player {index} mana: {player.mana}/{player.max_mana}")
         self.print_hand(player)
         self.print_board()
-        print(f"Player {index} HP: ", player.health)
-        print(f"Player {1 if index == 2 else 2} HP: ", opponent.health)
+        print(f"Player {index} HP: {player.health} ({player.armor} Armor)")
+        print(
+            f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
 
         while True:
             card_index = input()
@@ -153,11 +159,30 @@ class Game:
                 break
             try:
                 card_index = int(card_index) - 1
-
                 # play cards instantly here rather than after all input
 
                 if card_index == -1:
-                    player.use_hero_power()
+                    target = choose_target_enemy(player, opponent)
+                    if player.use_hero_power(
+                            target=target):
+                        destroyed_check_enemy(player, opponent, target)
+                        self.print_hand(player)
+                        self.print_board()
+                elif card_index == 10:
+                    if player.attack > 0:
+                        target = choose_target_enemy(player, opponent)
+                        if isinstance(target, Minion):
+                            player.health -= target.attack
+                        target.health -= player.attack
+                        player.weapon_durability = max(
+                            0, player.weapon_durability - 1)
+                        self.print_hand(player)
+                        self.print_board()
+
+                    else:
+                        print(
+                            "Your hero doesn't have any attack or a weapon equipped.")
+                    pass
                 elif 0 <= card_index < len(player.hand):
                     card: Card = player.hand[card_index]
                     if player.mana >= card.mana_cost:
@@ -167,6 +192,10 @@ class Game:
                         # print all cards again since card indices are different
                         self.print_hand(player)
                         self.print_board()
+                        print(
+                            f"Player {index} HP: {player.health} ({player.armor} Armor)")
+                        print(
+                            f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
                     else:
                         print("Not enough mana.")
                 else:
@@ -179,17 +208,19 @@ class Game:
 
     def print_board(self):
         print(
-            f"Player1 board: {', '.join(card.name for card in self.player1.board)}")
+            f"Player 1 board: {', '.join(card.name for card in self.player1.board)}")
         print(
-            f"Player2 board: {', '.join(card.name for card in self.player2.board)}")
+            f"Player 2 board: {', '.join(card.name for card in self.player2.board)}")
+        print("-------------------------------------------------")
 
     def print_hand(self, player: Player):
-        print("Hand:")
         print(f"0. Hero Power {int(player.hero_power)}/1")
+        print("Hand:")
         for i, card in enumerate(player.hand):
             print(
                 f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
-        pass
+        if player.attack > 0:
+            print("11. Attack with hero.")
 
     def game_over(self, p1_health, p2_health):
         if p1_health < 1:
