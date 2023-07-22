@@ -244,6 +244,7 @@ class Game:
                         if isinstance(target, Minion):
                             player.health -= target.attack
                         target.health -= player.attack
+                        self.is_game_over(player.health, opponent.health)
                         player.weapon_durability = max(
                             0, player.weapon_durability - 1)
                         if player.weapon_durability == 0:
@@ -299,7 +300,8 @@ class Game:
         if player.attack > 0:
             print("11. Attack with hero.")
 
-    def is_game_over(self, p1_health, p2_health):
+    @staticmethod
+    def is_game_over(p1_health, p2_health):
         if p1_health < 1:
             print("Player 2 wins!")
             return True, "Player2"

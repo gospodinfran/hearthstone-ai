@@ -102,7 +102,6 @@ def innervate(player: Player, opponent: Player):
 def moonfire(player: Player, opponent: Player):
     target = choose_target_enemy(player=player, opponent=opponent)
     target.health -= 1
-    destroyed_check_enemy(player, opponent, target)
 
 
 def claw(player: Player, opponent: Player):
