@@ -291,7 +291,8 @@ class Game:
             f"Player 2 board: {', '.join(card.name for card in self.player2.board)}")
         print("-------------------------------------------------")
 
-    def print_hand(self, player: Player):
+    @staticmethod
+    def print_hand(player: Player):
         print("Hand:")
         print(f"0. Hero Power {int(player.hero_power)}/1")
         for i, card in enumerate(player.hand):

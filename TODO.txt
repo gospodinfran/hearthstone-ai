@@ -1,1 +1,0 @@
-Instead of manually adding cards, train a neural net to look at card images and predict their stats -- mana cost, attack and health. GG
