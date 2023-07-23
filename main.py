@@ -42,26 +42,26 @@ class Hunter(HeroClass):
 
 
 class Paladin(HeroClass):
-    def use_power(self, player: Player, opponent, target):
+    def use_power(self, player, opponent, target):
         if len(player.board) < 7:
             player.board.append(silver_hand_recruit)
 
 
 class Druid(HeroClass):
-    def use_power(self, player: Player, opponent: Player, target):
+    def use_power(self, player, opponent, target):
         player.armor += 1
         player.attack += 1
 
 
 class Rogue(HeroClass):
-    def use_power(self, player: Player, opponent: Player, target):
+    def use_power(self, player, opponent, target):
         player.attack = 1
         player.weapon_durability = 2
         player.weapon = True
 
 
 class Shaman(HeroClass):
-    def use_power(self, player: Player, opponent: Player, target):
+    def use_power(self, player, opponent, target):
         if len(player.board) < 7:
             # TODO, implement all 4 shaman token hero power minions
             # silver hand recruit as placeholder
@@ -69,13 +69,13 @@ class Shaman(HeroClass):
 
 
 class Warlock(HeroClass):
-    def use_power(self, player: Player, opponent: Player, target):
+    def use_power(self, player, opponent, target):
         player.health -= 2
         player.draw()
 
 
 class Player:
-    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Priest()):
+    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Paladin()):
         self.health: int = 35 if renathal else 30
         self.max_health: int = 35 if renathal else 30
         self.hero_class: HeroClass = hero_class
@@ -108,7 +108,6 @@ class Player:
                 self.health -= self.fatigue
 
     def play(self, card, card_index, opponent):
-        # TODO, pass down card for effects like enrage, bloodsail raider, etc.
         if card.play(self, opponent) == False:
             return
 

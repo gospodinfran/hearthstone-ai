@@ -1,12 +1,5 @@
 from main import Card, Minion, Player
-from typing import Union
 import random
-
-
-def coin_effect(player: Player, opponent):
-    player.mana = min(10, player.mana + 1)
-
-# Game mechanics
 
 
 def choose_one(effect_one, effect_two):
@@ -44,7 +37,7 @@ def choose_target_enemy(player: Player, opponent: Player):
             return opponent.board[index - 1]
 
 
-def destroyed_check_enemy(player: Player, opponent: Player, target: Union[Player, Minion]):
+def destroyed_check_enemy(player: Player, opponent: Player, target: Player | Minion):
     if isinstance(target, Minion):
         if target.health == 0:
             index = opponent.board.index(target)
@@ -53,22 +46,26 @@ def destroyed_check_enemy(player: Player, opponent: Player, target: Union[Player
                 target.name, 0) + 1
 
 
+def coin_effect(player: 'Player', opponent):
+    player.mana = min(10, player.mana + 1)
+
+
 # Card effects
 
-def minion_no_effect(player: Player, opponent: Player):
-    pass
+def minion_no_effect(player, opponent):
+    return
 
 
 # Battlecry effects
 
-def bloodsail_corsair(player: Player, opponent: Player):
+def bloodsail_corsair(player: 'Player', opponent: 'Player'):
     if opponent.weapon:
         opponent.weapon_durability -= 1
         if opponent.weapon_durability == 0:
             opponent.weapon = False
 
 
-def abusive_sergeant(player: Player, opponent: Player):
+def abusive_sergeant(player, opponent):
     pass
 
 
