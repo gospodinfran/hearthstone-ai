@@ -1,11 +1,11 @@
 from main import Card, Minion, Player
+from enum import Enum
 import random
 
 
-def choose_one(effect_one, effect_two):
-    print("1. Effect one.")
-    print("2. Effect two.")
-    print("3. Cancel.")
+def choose_one(effect_one, effect_two, desc1, desc2):
+    print(f"1. {desc1}")
+    print(f"2. {desc2}")
     choose = input()
     try:
         choose = int(choose)
@@ -13,13 +13,10 @@ def choose_one(effect_one, effect_two):
             effect_one()
         elif choose == 2:
             effect_two()
-        elif choose == 3:
-            # returning False means the card was not played
-            return False
         else:
-            print("Choose a valid index.")
+            print("Choose a valid index (1 or 2).")
     except ValueError:
-        print("Choose a valid index.")
+        print("Choose a valid index (1 or 2).")
 
 
 def choose_target_enemy(player: Player, opponent: Player):
@@ -108,13 +105,12 @@ def claw(player: Player, opponent: Player):
 
 def nourish(player: Player, opponent: Player):
     def one():
-        player.max_mana += 2
+        player.max_mana = min(10, player.max_mana + 1)
         player.mana = min(player.mana + 2, 10)
 
     def two():
         player.draw(3)
-    if choose_one(one, two) == False:
-        return False
+    choose_one(one, two, "Gain 2 Mana Crystals.", "Draw 3 cards.")
 
 
 def healing_touch(player: Player, opponent: Player):
@@ -212,6 +208,20 @@ starfire_card = Card(cost=6, effect=starfire, name="Starfire",
 silver_hand_recruit = Minion(cost=1, attack=1, health=1,
                              effect=minion_no_effect, name="Silver Hand Recruit", description="")
 
+# Card tribes
+
+
+class Tribes(Enum):
+    MURLOC = "Murloc"
+    BEAST = "Beast"
+    TOTEM = "Totem"
+    DEMON = "Demon"
+    PIRATE = "Pirate"
+    DRAGON = "Dragon"
+    MECH = "Mech"
+    UNDEAD = "Undead"
+
+
 # Neutrals
 # No card text
 
@@ -219,7 +229,7 @@ wisp_card = Minion(cost=0, attack=1, health=1,
                    effect=minion_no_effect, name="Wisp", description="")
 
 murloc_raider_card = Minion(cost=1, attack=2, health=1,
-                            effect=minion_no_effect, name="Murloc Raider", description="")
+                            effect=minion_no_effect, name="Murloc Raider", description="", tribes=[Tribes.MURLOC])
 
 bloodfen_raptor_card = Minion(cost=2, attack=3, health=2,
                               effect=minion_no_effect, name="Bloodfen Raptor", description="")

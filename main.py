@@ -105,13 +105,11 @@ class Player:
                 self.health -= self.fatigue
 
     def play(self, card, card_index, opponent):
-        if card.play(self, opponent) == False:
-            return
-
         self.mana -= card.mana_cost
         popped_card: Card = self.hand.pop(card_index)
         popped_name = popped_card.name
         self.played[popped_name] = self.played.get(popped_name, 0) + 1
+        card.play(self, opponent)
 
     def use_hero_power(self, player=None, opponent=None, target=None):
         self.hero_class.use_hero_power(self, opponent, target)
@@ -127,15 +125,15 @@ class Card:
 
     def play(self, player: Player, opponent: Player):
         player.played[self.name] = player.played.get(self.name, 0) + 1
-        if self.effect(player, opponent) is not None:
-            return False
+        self.effect(player, opponent)
 
 
 class Minion(Card):
-    def __init__(self, cost, attack, health, effect, name, description):
+    def __init__(self, cost, attack, health, effect, name, description, tribes: List | None = None):
         super().__init__(cost, effect, name, description)
         self.attack = attack
         self.health = health
+        self.tribes = None if not tribes else set(tribes)
 
     def play(self, player: Player, opponent: Player):
         super().play(player, opponent)
