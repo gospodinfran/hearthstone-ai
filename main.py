@@ -4,16 +4,13 @@ from typing import List, Dict
 
 class HeroClass():
     def use_hero_power(self, player=None, opponent=None, target=None):
-        if player.hero_power:
-            if player.mana >= 2:
-                self.use_power(player, opponent, target)
-                player.hero_power = False
-                print("Hero power used.")
-                return True
-            else:
-                print("Not enough mana.")
+        if player.hero_power and player.mana >= 2:
+            self.use_power(player, opponent, target)
+            player.hero_power = False
+            print("Hero power used.")
+            return True
         else:
-            print("Hero power already used.")
+            print("Hero power already used or not enough mana.")
 
     def use_power(self, player=None, opponent=None, target=None):
         raise NotImplementedError("This method should be overriden.")
