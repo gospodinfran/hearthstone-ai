@@ -1,5 +1,7 @@
+import random
 from cards import *
 from typing import List, Dict
+from testing import get_random_deck
 
 
 class HeroClass():
@@ -323,7 +325,7 @@ class Game:
 
 
 if __name__ == "__main__":
-    p1_deck = get_random_deck()
-    p2_deck = get_random_deck()
+    p1_deck = get_random_deck(cards)
+    p2_deck = get_random_deck(cards)
     game = Game(p1_deck=p1_deck, p2_deck=p2_deck)
     game.game_loop()

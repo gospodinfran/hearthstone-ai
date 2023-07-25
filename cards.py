@@ -1,6 +1,5 @@
 from main import Card, Minion, Player, Weapon
 from enum import Enum
-import random
 
 
 def choose_one(effect_one, effect_two, desc1, desc2):
@@ -341,12 +340,3 @@ incomplete_cards = [
     hungry_crab_card,
     voodoo_doctor_card
 ]
-
-
-def get_random_deck():
-    deck = []
-    for card in cards:
-        for _ in range(2):
-            deck.append(card)
-    random.shuffle(deck)
-    return deck
