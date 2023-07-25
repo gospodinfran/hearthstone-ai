@@ -1,4 +1,4 @@
-from main import Card, Minion, Player
+from main import Card, Minion, Player, Weapon
 from enum import Enum
 import random
 
@@ -19,28 +19,54 @@ def choose_one(effect_one, effect_two, desc1, desc2):
         print("Choose a valid index (1 or 2).")
 
 
-def choose_target_enemy(player: Player, opponent: Player):
+def choose_target_enemy(player: Player, opponent: Player) -> Player | Minion:
     print("0. Opponent")
     for i, minion in enumerate(opponent.board):
         print(i + 1, minion.name)
 
-    valid = False
-    while not valid:
+    while True:
         index = int(input())
         if index == 0:
             return opponent
-        if 0 < index <= len(opponent.board):
-            valid = True
+        elif 0 < index <= len(opponent.board):
             return opponent.board[index - 1]
 
 
-def destroyed_check_enemy(player: Player, opponent: Player, target: Player | Minion):
-    if isinstance(target, Minion):
-        if target.health == 0:
-            index = opponent.board.index(target)
+def choose_target_any(player: Player, opponent: Player) -> Player | Minion:
+    print("0. Opponent")
+    for i, minion in enumerate(opponent.board):
+        print(f"{i+1}. {minion.name}")
+    l = len(opponent.board) + 1
+    print("------Allied:------")
+    print(f"{l}. Your Hero")
+    for i, minion in enumerate(player.board):
+        print(f"{i+1+l}. {minion.name}")
+
+    while True:
+        index = int(input())
+        if index == 0:
+            return opponent
+        elif 0 < index < l:
+            return opponent.board[index - 1]
+        elif index == l:
+            return player
+        elif l < index < len(player.board) + l:
+            return player.board[index - 1 - l]
+
+
+def destroyed_check(player: Player, opponent: Player):
+    for minion in player.board:
+        if minion.health < 1:
+            index = player.board.index(minion)
+            player.board.pop(index)
+            player.destroyed[minion.name] = player.destroyed.get(
+                minion.name, 0) + 1
+    for minion in opponent.board:
+        if minion.health < 1:
+            index = opponent.board.index(minion)
             opponent.board.pop(index)
-            opponent.destroyed[target.name] = opponent.destroyed.get(
-                target.name, 0) + 1
+            opponent.destroyed[minion.name] = opponent.destroyed.get(
+                minion.name, 0) + 1
 
 
 def coin_effect(player: 'Player', opponent):
@@ -94,8 +120,7 @@ def innervate(player: Player, opponent: Player):
 
 
 def moonfire(player: Player, opponent: Player):
-    target = choose_target_enemy(player=player, opponent=opponent)
-    target.health -= 1
+    choose_target_any(player=player, opponent=opponent).health -= 1
 
 
 def claw(player: Player, opponent: Player):
@@ -122,7 +147,7 @@ def wildfire_growth(player: Player, opponent: Player):
 
 
 def starfire(player: Player, opponent: Player):
-    opponent.health -= 5
+    choose_target_any(player, opponent).health -= 5
     player.draw()
 
 
@@ -134,7 +159,7 @@ def bite(player: Player, opponent: Player):
 # Hunter
 
 def arcane_shot(player, opponent):
-    opponent.health -= 2
+    choose_target_any(player, opponent).health -= 2
 
 
 # secrets
@@ -154,6 +179,10 @@ def snake_trap(player, opponent):
     pass
 
 # logic for the following two weapons is incomplete. card text not implemented yet.
+
+
+def equip_weapon(player: Player, opponent: Player):
+    pass
 
 
 def eaglehorn_bow(player: Player, opponent):
@@ -179,11 +208,12 @@ innervate_card = Card(cost=0, effect=innervate, name="Innervate",
 moonfire_card = Card(cost=0, effect=moonfire,
                      name="Moonfire", description="Deal 1 damage")
 
-eaglehorn_bow_card = Card(cost=3, effect=eaglehorn_bow,
-                          name="Eaglehorn Bow", description="")
+eaglehorn_bow_card = Weapon(cost=3, effect=equip_weapon,
+                            name="Eaglehorn Bow", description="", attack=3, durability=2)
 
-gladiators_longbow_card = Card(
-    cost=7, effect=gladiators_longbow, name="Gladiator's Longbow", description="")
+gladiators_longbow_card = Weapon(
+    cost=7, effect=equip_weapon, name="Gladiator's Longbow", description="", attack=5, durability=2)
+
 
 claw_card = Card(cost=1, effect=claw, name="Claw",
                  description="Give your hero 2 attack this turn. Gain 2 armor.")

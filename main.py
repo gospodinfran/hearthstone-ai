@@ -80,7 +80,7 @@ class Player:
         self.armor: int = 0
         self.mana: int = 0
         self.max_mana: int = 0
-        self.weapon: bool = False
+        self.weapon: Weapon | None = None
         self.weapon_durability: int = 0
         self.attacked: bool = False
         self.attack: int = 0
@@ -154,6 +154,18 @@ class Minion(Card):
                 print("no bueno")
 
 
+class Weapon(Card):
+    def __init__(self, cost, effect, name, description, attack, durability):
+        super().__init__(cost, effect, name, description)
+        self.attack = attack
+        self.durability = durability
+
+    def play(self, player: Player, opponent: Player):
+        player.weapon = self
+        player.weapon_durability = self.durability
+        player.attack += self.attack
+
+
 class Game:
     def __init__(self, p1_deck=None, p2_deck=None):
         self.player1 = Player(deck=p1_deck)
@@ -194,7 +206,8 @@ class Game:
         player.mana = min(10, player.max_mana)
         # reset hero power
         player.hero_power = True
-        player.attack = 0
+        player.attack = 0 if not player.weapon else player.weapon.attack
+        player.attacked = False
         player.draw()
 
         # printing for debugging/interface
@@ -210,73 +223,75 @@ class Game:
 
             if not card_index:
                 break
-            try:
-                card_index = int(card_index) - 1
-                # play cards instantly here rather than after all input
 
-                if card_index == -1:
-                    if player.mana >= 2:
-                        target = None
-                        if isinstance(player.hero_class, Mage):
-                            target = choose_target_enemy(player, opponent)
-                        if isinstance(player.hero_class, Priest):
-                            # TODO, allow targeting of own units, not just enemy via choose_target_enemy
-                            # This is placeholder until then. Heals self
-                            target = player
+            card_index = int(card_index) - 1
+            # play cards instantly here rather than after all input
 
-                        if player.use_hero_power(player=player, opponent=opponent,
-                                                 target=target):
-                            destroyed_check_enemy(player, opponent, target)
-                            self.is_game_over(player.health, opponent.health)
-                            self.print_hand(player)
-                            self.print_board()
-                    else:
-                        print("Not enough mana.")
-                elif card_index == 10:
-                    if player.attack > 0 and not player.attacked:
+            if card_index == -1:
+                if player.mana >= 2:
+                    target = None
+                    if isinstance(player.hero_class, Mage):
                         target = choose_target_enemy(player, opponent)
-                        if isinstance(target, Minion):
-                            player.health -= target.attack
-                        target.health -= player.attack
+                    if isinstance(player.hero_class, Priest):
+                        # TODO, allow targeting of own units, not just enemy via choose_target_enemy
+                        # This is placeholder until then. Heals self
+                        target = player
+
+                    # True if used, False if not used
+                    if player.use_hero_power(player=player, opponent=opponent,
+                                             target=target):
+                        destroyed_check(player, opponent)
                         self.is_game_over(player.health, opponent.health)
-                        player.weapon_durability = max(
-                            0, player.weapon_durability - 1)
-                        if player.weapon_durability == 0:
-                            player.weapon == False
-                        player.attacked = True
                         self.print_hand(player)
                         self.print_board()
-                        print(
-                            f"Player {index} HP: {player.health} ({player.armor} Armor)")
-                        print(
-                            f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
-
-                    else:
-                        print(
-                            "You already attacked.")
-                    pass
-                elif 0 <= card_index < len(player.hand):
-                    card: Card = player.hand[card_index]
-                    if player.mana >= card.mana_cost:
-                        player.play(card=card, card_index=card_index,
-                                    opponent=opponent)
-                        print(f"Current mana: {player.mana}/{player.max_mana}")
-                        # print all cards again since card indices are different
-                        self.print_hand(player)
-                        self.print_board()
-                        print(
-                            f"Player {index} HP: {player.health} ({player.armor} Armor)")
-                        print(
-                            f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
-                    else:
-                        print("Not enough mana.")
                 else:
-                    print("Not a valid card index.")
+                    print("Not enough mana.")
+            elif card_index == 10:
+                if player.attack > 0 and not player.attacked:
+                    target = choose_target_enemy(player, opponent)
+                    target.health -= player.attack
+                    if not isinstance(target, Player):
+                        # BUG: player never takes damage for some reason
+                        player.health -= target.attack
+                        print(f"target attack:{target.attack}")
+                        print(f"target health: {target.health}")
+                        print(f"target name: {target.name}")
+                    player.weapon_durability = max(
+                        0, player.weapon_durability - 1)
+                    if player.weapon_durability == 0:
+                        player.weapon == None
+                    player.attacked = True
+                    self.is_game_over(player.health, opponent.health)
+                    destroyed_check(player, opponent)
+                    self.print_hand(player)
+                    self.print_board()
+                    print(
+                        f"Player {index} HP: {player.health} ({player.armor} Armor)")
+                    print(
+                        f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
 
-            except ValueError:
-                print(
-                    "Invalid input. Please enter a valid card index or press Enter to skip your turn."
-                )
+                else:
+                    print(
+                        "You already attacked.")
+                pass
+            elif 0 <= card_index < len(player.hand):
+                card: Card = player.hand[card_index]
+                if player.mana >= card.mana_cost:
+                    player.play(card=card, card_index=card_index,
+                                opponent=opponent)
+                    destroyed_check(player, opponent)
+                    print(f"Current mana: {player.mana}/{player.max_mana}")
+                    # print all cards again since card indices are different
+                    self.print_hand(player)
+                    self.print_board()
+                    print(
+                        f"Player {index} HP: {player.health} ({player.armor} Armor)")
+                    print(
+                        f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
+                else:
+                    print("Not enough mana.")
+            else:
+                print("Not a valid card index.")
 
     def print_board(self):
         print(
@@ -287,12 +302,13 @@ class Game:
 
     @staticmethod
     def print_hand(player: Player):
+        print(f"Current mana: {player.mana}/{player.max_mana}")
         print("Hand:")
         print(f"0. Hero Power {int(player.hero_power)}/1")
         for i, card in enumerate(player.hand):
             print(
                 f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
-        if player.attack > 0:
+        if player.attack > 0 or player.weapon:
             print("11. Attack with hero.")
 
     @staticmethod
