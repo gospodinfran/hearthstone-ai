@@ -2,6 +2,18 @@ from main import Card, Minion, Player, Weapon
 from enum import Enum
 
 
+def destroy_minion(player, opponent, target, index, player_or_opponent):
+    # 0 = player, 1 = opponent
+    if player_or_opponent == 0:
+        player.board.pop(index)
+        player.destroyed[target.name] = player.destroyed.get(
+            target.name, 0) + 1
+    elif player_or_opponent == 1:
+        opponent.board.pop(index)
+        opponent.destroyed[target.name] = opponent.destroyed.get(
+            target.name, 0) + 1
+
+
 def choose_one(effect_one, effect_two, desc1, desc2):
     print(f"1. {desc1}")
     print(f"2. {desc2}")
@@ -19,6 +31,7 @@ def choose_one(effect_one, effect_two, desc1, desc2):
 
 
 def choose_target_enemy(player: Player, opponent: Player) -> Player | Minion:
+    print("------Enemy:------")
     print("0. Opponent")
     for i, minion in enumerate(opponent.board):
         print(i + 1, minion.name)
@@ -32,6 +45,7 @@ def choose_target_enemy(player: Player, opponent: Player) -> Player | Minion:
 
 
 def choose_target_any(player: Player, opponent: Player) -> Player | Minion:
+    print("------Enemy:------")
     print("0. Opponent")
     for i, minion in enumerate(opponent.board):
         print(f"{i+1}. {minion.name}")
@@ -51,6 +65,29 @@ def choose_target_any(player: Player, opponent: Player) -> Player | Minion:
             return player
         elif l < index < len(player.board) + l:
             return player.board[index - 1 - l]
+
+
+def choose_any_minion(player, opponent):
+    i = 0
+    print("------Enemy:------")
+    for minion in opponent.board:
+        print(f"{i+1}. {minion.name}")
+        i += 1
+
+    print("------Allied:------")
+    for minion in player.board:
+        print(f"{i+1}. {minion.name}")
+        i += 1
+
+    while True:
+        index = int(input())
+        if 0 < index <= (len(opponent.board) + len(player.board)):
+            if index <= len(opponent.board):
+                # returning tuple (Minion, hand index, player/opponent)
+                # player 0, opponent 1
+                return (opponent.board[index - 1], index - 1, 1)
+            else:
+                return (player.board[index - 1], index - 1, 0)
 
 
 def destroyed_check(player: Player, opponent: Player):
@@ -125,6 +162,12 @@ def moonfire(player: Player, opponent: Player):
 def claw(player: Player, opponent: Player):
     player.attack += 2
     player.armor += 2
+
+
+def naturalize(player, opponent):
+    target, index, p_or_o = choose_any_minion(player, opponent)
+    destroy_minion(player, opponent, target, index, p_or_o)
+    opponent.draw(2)
 
 
 def nourish(player: Player, opponent: Player):
@@ -216,6 +259,9 @@ gladiators_longbow_card = Weapon(
 
 claw_card = Card(cost=1, effect=claw, name="Claw",
                  description="Give your hero 2 attack this turn. Gain 2 armor.")
+
+naturalize_card = Card(cost=1, effect=naturalize, name="Naturalize",
+                       description="Destroy a minion. Your opponent draws 2 cards.")
 
 nourish_card = Card(cost=5, effect=nourish, name="Nourish",
                     description="Choose one - Gain 2 Mana Crystals; or Draw 3 cards.")
@@ -313,6 +359,7 @@ cards = [
     innervate_card,
     moonfire_card,
     claw_card,
+    naturalize_card,
     nourish_card,
     healing_touch_card,
     wildfire_growth_card,

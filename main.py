@@ -1,7 +1,7 @@
-import random
-from cards import *
 from typing import List, Dict
+from cards import *
 from testing import get_random_deck
+import random
 
 
 class HeroClass():
