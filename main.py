@@ -87,6 +87,7 @@ class Player:
         self.attacked: bool = False
         self.attack: int = 0
         self.fatigue: int = 0
+        self.persistent_effects = None
         self.hand: List[Card] = []
         # minions and locations. array is good enough. O(1) time
         self.board: List[Card] = []
@@ -134,6 +135,7 @@ class Minion(Card):
     def __init__(self, cost, attack, health, effect, name, description, tribes: List | None = None):
         super().__init__(cost, effect, name, description)
         self.attack = attack
+        self.max_health = health
         self.health = health
         self.tribes = None if not tribes else set(tribes)
 
@@ -255,9 +257,6 @@ class Game:
                     if not isinstance(target, Player):
                         # BUG: player never takes damage for some reason
                         player.health -= target.attack
-                        print(f"target attack:{target.attack}")
-                        print(f"target health: {target.health}")
-                        print(f"target name: {target.name}")
                     player.weapon_durability = max(
                         0, player.weapon_durability - 1)
                     if player.weapon_durability == 0:

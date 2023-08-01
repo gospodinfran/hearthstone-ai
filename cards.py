@@ -1,4 +1,5 @@
 from main import Card, Minion, Player, Weapon
+from typing import Tuple, Literal
 from enum import Enum
 
 
@@ -67,7 +68,7 @@ def choose_target_any(player: Player, opponent: Player) -> Player | Minion:
             return player.board[index - 1 - l]
 
 
-def choose_any_minion(player, opponent):
+def choose_any_minion(player, opponent) -> Tuple[Minion, int, Literal[1, 0]]:
     i = 0
     print("------Enemy:------")
     for minion in opponent.board:
@@ -103,6 +104,22 @@ def destroyed_check(player: Player, opponent: Player):
             opponent.board.pop(index)
             opponent.destroyed[minion.name] = opponent.destroyed.get(
                 minion.name, 0) + 1
+
+
+def apply_all_enemy_board(player, opponent, effect):
+    for minion in opponent.board:
+        effect(minion)
+    destroyed_check(player, opponent)
+
+
+def apply_all_friendly_board(player, opponent, effect):
+    for minion in player.board:
+        effect(minion)
+    destroyed_check(player, opponent)
+
+
+def apply_all(player, opponent, effect):
+    pass
 
 
 def coin_effect(player: 'Player', opponent):
@@ -170,6 +187,55 @@ def naturalize(player, opponent):
     opponent.draw(2)
 
 
+def savagery(player, opponent):
+    minion, index, p_or_o = choose_any_minion(player, opponent)
+    minion.health -= player.attack
+    if minion.health < 1:
+        destroy_minion(player, opponent, minion, index, p_or_o)
+
+
+def mark_of_the_wild(player, opponent):
+    pass
+
+
+def power_of_the_wild(player, opponent):
+    pass
+
+
+def wild_growth(player: Player, opponent: Player):
+    player.max_mana = min(10, player.max_mana + 1)
+
+
+def wrath(player, opponent):
+    def one():
+        minion, index, p_or_o = choose_any_minion(player, opponent)
+        minion.health -= 3
+        if minion.health < 1:
+            destroy_minion(player, opponent, minion, index, p_or_o)
+
+    def two():
+        minion, index, p_or_o = choose_any_minion(player, opponent)
+        minion.health -= 1
+        if minion.health < 1:
+            destroy_minion(player, opponent, minion, index, p_or_o)
+        player.draw()
+
+    choose_one(one, two, "Deal 3 damage to a minion.",
+               "Deal 1 damage and draw a card.")
+
+
+def swipe(player, opponent):
+    target = choose_target_enemy(player, opponent)
+    target.health -= 4
+    if isinstance(target, Minion):
+        destroyed_check(player, opponent)
+
+    def effect(minion):
+        minion.health -= 1
+
+    apply_all_enemy_board(player, opponent, effect)
+
+
 def nourish(player: Player, opponent: Player):
     def one():
         player.max_mana = min(10, player.max_mana + 1)
@@ -177,15 +243,17 @@ def nourish(player: Player, opponent: Player):
 
     def two():
         player.draw(3)
+
     choose_one(one, two, "Gain 2 Mana Crystals.", "Draw 3 cards.")
 
 
+def starfall(player, opponent):
+    pass
+
+
 def healing_touch(player: Player, opponent: Player):
-    player.health = min(30, player.health + 8)
-
-
-def wildfire_growth(player: Player, opponent: Player):
-    player.max_mana = min(10, player.max_mana + 1)
+    target = choose_target_any(player, opponent)
+    target.health = min(target.max_health, target.health + 8)
 
 
 def starfire(player: Player, opponent: Player):
@@ -250,6 +318,18 @@ innervate_card = Card(cost=0, effect=innervate, name="Innervate",
 moonfire_card = Card(cost=0, effect=moonfire,
                      name="Moonfire", description="Deal 1 damage")
 
+naturalize_card = Card(cost=1, effect=naturalize, name="Naturalize",
+                       description="Destroy a minion. Your opponent draws 2 cards.")
+
+savagery_card = Card(1, savagery, "Savagery",
+                     "Deal damage equal to your hero's Attack to a minion.")
+
+wrath_card = Card(2, wrath, "Wrath",
+                  "Choose One - Deal 3 damage to a minion; or 1 damage and draw a card.")
+
+swipe_card = Card(4, swipe, "Swipe",
+                  "Choose One - Deal 5 damage to a minion; or 2 damage to all enemy minions.")
+
 eaglehorn_bow_card = Weapon(cost=3, effect=equip_weapon,
                             name="Eaglehorn Bow", description="", attack=3, durability=2)
 
@@ -260,8 +340,6 @@ gladiators_longbow_card = Weapon(
 claw_card = Card(cost=1, effect=claw, name="Claw",
                  description="Give your hero 2 attack this turn. Gain 2 armor.")
 
-naturalize_card = Card(cost=1, effect=naturalize, name="Naturalize",
-                       description="Destroy a minion. Your opponent draws 2 cards.")
 
 nourish_card = Card(cost=5, effect=nourish, name="Nourish",
                     description="Choose one - Gain 2 Mana Crystals; or Draw 3 cards.")
@@ -269,8 +347,8 @@ nourish_card = Card(cost=5, effect=nourish, name="Nourish",
 healing_touch_card = Card(cost=3, effect=healing_touch,
                           name="Healing Touch", description="Restore 8 Health.")
 
-wildfire_growth_card = Card(cost=2, effect=wildfire_growth,
-                            name="Wildfire Growth", description="Gain an empty Mana Crystal.")
+wild_growth_card = Card(cost=2, effect=wild_growth,
+                        name="Wild Growth", description="Gain an empty Mana Crystal.")
 
 bite_card = Card(cost=4, effect=bite, name="Bite",
                  description="Give your hero 4 Attack this turn. Gain 4 armor.")
@@ -360,11 +438,14 @@ cards = [
     moonfire_card,
     claw_card,
     naturalize_card,
+    savagery_card,
+    wrath_card,
+    bite_card,
+    swipe_card,
     nourish_card,
     healing_touch_card,
-    wildfire_growth_card,
+    wild_growth_card,
     starfire_card,
-    bite_card,
     wisp_card,
     murloc_raider_card,
     bloodsail_corsair_card,
