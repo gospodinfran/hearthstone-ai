@@ -119,6 +119,7 @@ class Player:
             self.armor -= damage
         else:
             self.health += self.armor - damage
+            self.armor = 0
 
     def use_hero_power(self, player=None, opponent=None, target=None):
         self.hero_class.use_hero_power(self, opponent, target)
@@ -138,12 +139,12 @@ class Card:
 
 
 class Minion(Card):
-    def __init__(self, cost, attack, health, effect, name, description, tribes: List | None = None):
+    def __init__(self, cost, attack, health, effect, name, description, tribes: List[str] | None = None):
         super().__init__(cost, effect, name, description)
         self.attack = attack
         self.max_health = health
         self.health = health
-        self.tribes = None if not tribes else set(tribes)
+        self.tribes = set(tribes) if tribes else None
 
     def play(self, player: Player, opponent: Player):
         super().play(player, opponent)
@@ -302,9 +303,9 @@ class Game:
 
     def print_board(self):
         print(
-            f"Player 1 board: {', '.join(card.name for card in self.player1.board)}")
+            f"Player 1 board: {', '.join(f'{card.name} [{card.attack}/{card.health}]' for card in self.player1.board)}")
         print(
-            f"Player 2 board: {', '.join(card.name for card in self.player2.board)}")
+            f"Player 2 board: {', '.join(f'{card.name} [{card.attack}/{card.health}]'for card in self.player2.board)}")
         print("-------------------------------------------------")
 
     @staticmethod

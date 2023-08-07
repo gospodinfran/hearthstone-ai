@@ -116,13 +116,11 @@ def deal_damage(target, damage):
 def apply_all_enemy_board(player, opponent, effect):
     for minion in opponent.board:
         effect(minion)
-    destroyed_check(player, opponent)
 
 
 def apply_all_friendly_board(player, opponent, effect):
     for minion in player.board:
         effect(minion)
-    destroyed_check(player, opponent)
 
 
 def apply_all(player, opponent, effect):
@@ -139,7 +137,18 @@ def minion_no_effect(player, opponent):
     return
 
 
+class Tribes(Enum):
+    MURLOC = "Murloc"
+    BEAST = "Beast"
+    TOTEM = "Totem"
+    DEMON = "Demon"
+    PIRATE = "Pirate"
+    DRAGON = "Dragon"
+    MECH = "Mech"
+    UNDEAD = "Undead"
+
 # Battlecry effects
+
 
 def bloodsail_corsair(player: 'Player', opponent: 'Player'):
     if opponent.weapon:
@@ -211,7 +220,19 @@ def mark_of_the_wild(player, opponent):
 
 
 def power_of_the_wild(player, opponent):
-    pass
+    def one():
+        def effect(minion):
+            minion.max_health += 1
+            minion.health += 1
+            minion.attack += 1
+
+        apply_all_friendly_board(player, opponent, effect)
+
+    def two():
+        if len(player.board) < 7:
+            player.board.append(panther_token)
+
+    choose_one(one, two, "Give your minions +1/+1.", "Summong a 3/2 panther.")
 
 
 def wild_growth(player: Player, opponent: Player):
@@ -239,12 +260,19 @@ def wrath(player, opponent):
 def swipe(player, opponent):
     target = choose_target_enemy(player, opponent)
     deal_damage(target, 4)
+
+    if hasattr(target, 'use_hero_power'):
+        apply_all_enemy_board(player, opponent, lambda minion: setattr(
+            minion, 'health', minion.health - 1))
+    else:
+        deal_damage(opponent, 1)
+        target_idx = opponent.board.index(target)
+        for i, enemy_minion in enumerate(opponent.board):
+            if i == target_idx:
+                continue
+            deal_damage(enemy_minion, 1)
+
     destroyed_check(player, opponent)
-
-    def effect(minion):
-        minion.health -= 1
-
-    apply_all_enemy_board(player, opponent, effect)
 
 
 def nourish(player: Player, opponent: Player):
@@ -372,21 +400,15 @@ starfire_card = Card(cost=6, effect=starfire, name="Starfire",
 
 # Paladin
 
+
+# Token Cards
+
+panther_token = Minion(2, 3, 2, minion_no_effect,
+                       "Panther", "", [Tribes.BEAST])
+
 silver_hand_recruit = Minion(cost=1, attack=1, health=1,
                              effect=minion_no_effect, name="Silver Hand Recruit", description="")
-
 # Card tribes
-
-
-class Tribes(Enum):
-    MURLOC = "Murloc"
-    BEAST = "Beast"
-    TOTEM = "Totem"
-    DEMON = "Demon"
-    PIRATE = "Pirate"
-    DRAGON = "Dragon"
-    MECH = "Mech"
-    UNDEAD = "Undead"
 
 
 # Neutrals
