@@ -8,6 +8,7 @@ class HeroClass():
     def use_hero_power(self, player=None, opponent=None, target=None):
         if player.hero_power and player.mana >= 2:
             self.use_power(player, opponent, target)
+            player.mana -= 2
             player.hero_power = False
             print("Hero power used.")
             return True
@@ -15,7 +16,7 @@ class HeroClass():
             print("Hero power already used or not enough mana.")
 
     def use_power(self, player=None, opponent=None, target=None):
-        raise NotImplementedError("This method should be overriden.")
+        raise NotImplementedError("This will be overridden.")
 
 
 class Mage(HeroClass):
@@ -62,9 +63,8 @@ class Rogue(HeroClass):
 class Shaman(HeroClass):
     def use_power(self, player, opponent, target):
         if len(player.board) < 7:
-            # TODO, implement all 4 shaman token hero power minions
-            # silver hand recruit as placeholder
-            player.board.append(silver_hand_recruit)
+            rand_totem = random.choice(basic_totems)
+            player.board.append(rand_totem)
 
 
 class Warlock(HeroClass):
@@ -74,7 +74,7 @@ class Warlock(HeroClass):
 
 
 class Player:
-    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Paladin()):
+    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Shaman()):
         self.health: int = 35 if renathal else 30
         self.max_health: int = 35 if renathal else 30
         self.hero_class: HeroClass = hero_class
@@ -122,7 +122,7 @@ class Player:
             self.armor = 0
 
     def use_hero_power(self, player=None, opponent=None, target=None):
-        self.hero_class.use_hero_power(self, opponent, target)
+        return self.hero_class.use_hero_power(self, opponent, target)
 
 
 class Card:
@@ -242,13 +242,10 @@ class Game:
                 if player.mana >= 2:
                     target = None
                     if isinstance(player.hero_class, Mage):
-                        target = choose_target_enemy(player, opponent)
+                        target = choose_target_any(player, opponent)
                     if isinstance(player.hero_class, Priest):
-                        # TODO, allow targeting of own units, not just enemy via choose_target_enemy
-                        # This is placeholder until then. Heals self
-                        target = player
+                        target = choose_target_any(player, opponent)
 
-                    # True if used, False if not used
                     if player.use_hero_power(player=player, opponent=opponent,
                                              target=target):
                         destroyed_check(player, opponent)

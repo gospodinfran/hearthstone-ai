@@ -1,5 +1,6 @@
 from main import Card, Minion, Player, Weapon
 from typing import Tuple, Literal
+import random
 from enum import Enum
 
 
@@ -402,6 +403,35 @@ starfire_card = Card(cost=6, effect=starfire, name="Starfire",
 
 
 # Token Cards
+
+# TODO: End of turn effects for totems
+# def strength_totem(player, opponent):
+#     random.choice(player.board).attack += 1
+
+
+# def healing_totem(player, opponent):
+#     apply_all_friendly_board(player, opponent, lambda minion: setattr(
+#         minion, 'health', min(minion.max_health, minion.health + 1)))
+
+
+searing_totem_token = Minion(
+    1, 1, 1, minion_no_effect, "Searing totem", "", [Tribes.TOTEM])
+
+stoneclaw_totem_token = Minion(
+    1, 0, 2, minion_no_effect, "Stoneclaw totem", "", [Tribes.TOTEM])
+
+strength_totem_token = Minion(
+    1, 0, 2, minion_no_effect, "Strength totem", "", [Tribes.TOTEM])
+
+healing_totem_token = Minion(
+    1, 0, 2, minion_no_effect, "Healing totem", "", [Tribes.TOTEM])
+
+basic_totems = [
+    searing_totem_token,
+    stoneclaw_totem_token,
+    strength_totem_token,
+    healing_totem_token
+]
 
 panther_token = Minion(2, 3, 2, minion_no_effect,
                        "Panther", "", [Tribes.BEAST])
