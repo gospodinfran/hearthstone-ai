@@ -64,7 +64,7 @@ def choose_target_any(player: Player, opponent: Player) -> Player | Minion:
             return opponent.board[index - 1]
         elif index == l:
             return player
-        elif l < index < len(player.board) + l:
+        elif l < index < len(player.board) + l + 1:
             return player.board[index - 1 - l]
 
 
@@ -104,6 +104,13 @@ def destroyed_check(player: Player, opponent: Player):
             opponent.board.pop(index)
             opponent.destroyed[minion.name] = opponent.destroyed.get(
                 minion.name, 0) + 1
+
+
+def deal_damage(target, damage):
+    if hasattr(target, 'take_damage'):
+        target.take_damage(damage)
+    else:
+        target.health -= damage
 
 
 def apply_all_enemy_board(player, opponent, effect):
@@ -173,7 +180,8 @@ def innervate(player: Player, opponent: Player):
 
 
 def moonfire(player: Player, opponent: Player):
-    choose_target_any(player=player, opponent=opponent).health -= 1
+    target = choose_target_any(player, opponent)
+    deal_damage(target, 1)
 
 
 def claw(player: Player, opponent: Player):
@@ -195,7 +203,11 @@ def savagery(player, opponent):
 
 
 def mark_of_the_wild(player, opponent):
-    pass
+    minion, index, p_or_o = choose_any_minion(player, opponent)
+    minion.max_health += 2
+    minion.health += 2
+    minion.attack += 2
+    # TODO add taunt
 
 
 def power_of_the_wild(player, opponent):
@@ -226,9 +238,8 @@ def wrath(player, opponent):
 
 def swipe(player, opponent):
     target = choose_target_enemy(player, opponent)
-    target.health -= 4
-    if isinstance(target, Minion):
-        destroyed_check(player, opponent)
+    deal_damage(target, 4)
+    destroyed_check(player, opponent)
 
     def effect(minion):
         minion.health -= 1
@@ -257,7 +268,7 @@ def healing_touch(player: Player, opponent: Player):
 
 
 def starfire(player: Player, opponent: Player):
-    choose_target_any(player, opponent).health -= 5
+    deal_damage(choose_target_any(player, opponent), 5)
     player.draw()
 
 
@@ -269,7 +280,7 @@ def bite(player: Player, opponent: Player):
 # Hunter
 
 def arcane_shot(player, opponent):
-    choose_target_any(player, opponent).health -= 2
+    deal_damage(choose_target_any(player, opponent), 2)
 
 
 # secrets
@@ -323,6 +334,9 @@ naturalize_card = Card(cost=1, effect=naturalize, name="Naturalize",
 
 savagery_card = Card(1, savagery, "Savagery",
                      "Deal damage equal to your hero's Attack to a minion.")
+
+mark_of_the_wild_card = Card(
+    2, mark_of_the_wild, "Mark of the Wild", "Give a minion Taunt and +2/+2.")
 
 wrath_card = Card(2, wrath, "Wrath",
                   "Choose One - Deal 3 damage to a minion; or 1 damage and draw a card.")
@@ -439,6 +453,7 @@ cards = [
     claw_card,
     naturalize_card,
     savagery_card,
+    mark_of_the_wild_card,
     wrath_card,
     bite_card,
     swipe_card,

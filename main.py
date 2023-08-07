@@ -114,6 +114,12 @@ class Player:
         self.played[popped_name] = self.played.get(popped_name, 0) + 1
         card.play(self, opponent)
 
+    def take_damage(self, damage):
+        if self.armor >= damage:
+            self.armor -= damage
+        else:
+            self.health += self.armor - damage
+
     def use_hero_power(self, player=None, opponent=None, target=None):
         self.hero_class.use_hero_power(self, opponent, target)
 
@@ -253,10 +259,10 @@ class Game:
             elif card_index == 10:
                 if player.attack > 0 and not player.attacked:
                     target = choose_target_enemy(player, opponent)
-                    target.health -= player.attack
-                    if not isinstance(target, Player):
-                        # BUG: player never takes damage for some reason
-                        player.health -= target.attack
+                    deal_damage(target, player.attack)
+                    # check if target is Player object
+                    if not hasattr(target, 'use_hero_power'):
+                        deal_damage(player, target.attack)
                     player.weapon_durability = max(
                         0, player.weapon_durability - 1)
                     if player.weapon_durability == 0:
