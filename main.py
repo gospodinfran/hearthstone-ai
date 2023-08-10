@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Callable
 from cards import *
 from testing import get_random_deck
 import random
@@ -62,6 +62,10 @@ class Shaman(HeroClass):
     def use_power(self, player, opponent, target):
         if len(player.board) < 7:
             rand_totem = random.choice(basic_totems)
+            if rand_totem.name == strength_totem_token.name:
+                player.end_of_turn_effects.append(strength_totem_effect)
+            elif rand_totem.name == healing_totem_token.name:
+                player.end_of_turn_effects.append(healing_totem_effect)
             player.board.append(rand_totem)
 
 
@@ -87,6 +91,7 @@ class Player:
         self.attack: int = 0
         self.fatigue: int = 0
         self.persistent_effects = None
+        self.end_of_turn_effects: List[Callable] = []
         self.hand: List[Card] = []
         # minions and locations. array is good enough. O(1) time
         self.board: List[Card] = []
@@ -138,11 +143,12 @@ class Card:
 
 
 class Minion(Card):
-    def __init__(self, cost, attack, health, effect, name, description, tribes: List[str] | None = None):
+    def __init__(self, cost, attack, health, effect, name, description, tribes: List[str] | None = None, deathrattle=None):
         super().__init__(cost, effect, name, description)
         self.attack = attack
         self.max_health = health
         self.health = health
+        self.deathrattle = deathrattle
         self.tribes = set(tribes) if tribes else None
 
     def play(self, player: Player, opponent: Player):
@@ -296,6 +302,10 @@ class Game:
                     print("Not enough mana.")
             else:
                 print("Not a valid card index.")
+
+        # call when turn ends
+        for effect in player.end_of_turn_effects:
+            effect(player, opponent)
 
     def print_board(self):
         print(

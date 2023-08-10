@@ -10,6 +10,7 @@ def destroy_minion(player, opponent, target, index, player_or_opponent):
         player.board.pop(index)
         player.destroyed[target.name] = player.destroyed.get(
             target.name, 0) + 1
+
     elif player_or_opponent == 1:
         opponent.board.pop(index)
         opponent.destroyed[target.name] = opponent.destroyed.get(
@@ -92,6 +93,7 @@ def choose_any_minion(player, opponent) -> Tuple[Minion, int, Literal[1, 0]]:
                 return (player.board[index - 1], index - 1, 0)
 
 
+# Gets called after every card is played. All deathrattles trigger here.
 def destroyed_check(player: Player, opponent: Player):
     for minion in player.board:
         if minion.health < 1:
@@ -99,12 +101,16 @@ def destroyed_check(player: Player, opponent: Player):
             player.board.pop(index)
             player.destroyed[minion.name] = player.destroyed.get(
                 minion.name, 0) + 1
+            if minion.deathrattle:
+                minion.deathrattle(player, opponent)
     for minion in opponent.board:
         if minion.health < 1:
             index = opponent.board.index(minion)
             opponent.board.pop(index)
             opponent.destroyed[minion.name] = opponent.destroyed.get(
                 minion.name, 0) + 1
+            if minion.deathrattle:
+                minion.deathrattle(opponent, player)
 
 
 def deal_damage(target, damage):
@@ -346,6 +352,16 @@ def gladiators_longbow(player: Player, opponent: Player):
     player.attack = 5
     player.weapon = True
 
+# Deathrattles
+
+
+def strength_totem_dr(player, opponent):
+    player.end_of_turn_effects.remove(strength_totem_effect)
+
+
+def healing_totem_dr(player, opponent):
+    player.end_of_turn_effects.remove(healing_totem_effect)
+
 
 coin_card = Card(cost=0, effect=coin_effect, name="The Coin",
                  description="Gain 1 Mana Crystal this turn only.")
@@ -404,14 +420,25 @@ starfire_card = Card(cost=6, effect=starfire, name="Starfire",
 
 # Token Cards
 
-# TODO: End of turn effects for totems
-# def strength_totem(player, opponent):
-#     random.choice(player.board).attack += 1
+def strength_totem_effect(player, opponent):
+    filtered = [minion for minion in player.board if minion.name !=
+                strength_totem_token.name]
+    if filtered:
+        random.choice(filtered).attack += 1
 
 
-# def healing_totem(player, opponent):
-#     apply_all_friendly_board(player, opponent, lambda minion: setattr(
-#         minion, 'health', min(minion.max_health, minion.health + 1)))
+def healing_totem_effect(player, opponent):
+    apply_all_friendly_board(player, opponent, lambda minion: setattr(
+        minion, 'health', min(minion.max_health, minion.health + 1)))
+
+
+# Has to look like this because this effect happens when it is played from hand.
+def strength_totem(player: Player, opponent):
+    player.end_of_turn_effects.append(strength_totem_effect(player, opponent))
+
+
+def healing_totem(player, opponent):
+    player.end_of_turn_effects.append(healing_totem_effect(player, opponent))
 
 
 searing_totem_token = Minion(
@@ -421,10 +448,10 @@ stoneclaw_totem_token = Minion(
     1, 0, 2, minion_no_effect, "Stoneclaw totem", "", [Tribes.TOTEM])
 
 strength_totem_token = Minion(
-    1, 0, 2, minion_no_effect, "Strength totem", "", [Tribes.TOTEM])
+    1, 0, 2, strength_totem, "Strength totem", "", [Tribes.TOTEM], strength_totem_dr)
 
 healing_totem_token = Minion(
-    1, 0, 2, minion_no_effect, "Healing totem", "", [Tribes.TOTEM])
+    1, 0, 2, healing_totem, "Healing totem", "", [Tribes.TOTEM], healing_totem_dr)
 
 basic_totems = [
     searing_totem_token,
