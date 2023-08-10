@@ -438,6 +438,9 @@ panther_token = Minion(2, 3, 2, minion_no_effect,
 
 silver_hand_recruit = Minion(cost=1, attack=1, health=1,
                              effect=minion_no_effect, name="Silver Hand Recruit", description="")
+
+wicked_knife = Weapon(1, equip_weapon, "Wicked Knife", "", 1, 2)
+
 # Card tribes
 
 

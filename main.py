@@ -21,7 +21,7 @@ class HeroClass():
 
 class Mage(HeroClass):
     def use_power(self, player, opponent, target):
-        target.health -= 1
+        deal_damage(target, 1)
 
 
 class Warrior(HeroClass):
@@ -32,13 +32,12 @@ class Warrior(HeroClass):
 class Priest(HeroClass):
     def use_power(self, player, opponent, target):
         # TODO, implement base stats for all minions because heals can't go over base health
-        if isinstance(target, Player):
-            target.health = min(target.max_health, target.health + 2)
+        target.health = min(target.max_health, target.health + 2)
 
 
 class Hunter(HeroClass):
     def use_power(self, player, opponent, target):
-        opponent.health -= 2
+        deal_damage(opponent, 2)
 
 
 class Paladin(HeroClass):
@@ -55,9 +54,8 @@ class Druid(HeroClass):
 
 class Rogue(HeroClass):
     def use_power(self, player, opponent, target):
-        player.attack = 1
-        player.weapon_durability = 2
-        player.weapon = True
+        # TODO make rogue weapon
+        wicked_knife.play(player, opponent)
 
 
 class Shaman(HeroClass):
@@ -85,6 +83,7 @@ class Player:
         self.weapon: Weapon | None = None
         self.weapon_durability: int = 0
         self.attacked: bool = False
+        # Treat attack as attack gained during a turn that is lost upon every new turn
         self.attack: int = 0
         self.fatigue: int = 0
         self.persistent_effects = None
@@ -174,7 +173,6 @@ class Weapon(Card):
     def play(self, player: Player, opponent: Player):
         player.weapon = self
         player.weapon_durability = self.durability
-        player.attack += self.attack
 
 
 class Game:
@@ -215,9 +213,9 @@ class Game:
         if player.max_mana < 10:
             player.max_mana += 1
         player.mana = min(10, player.max_mana)
-        # reset hero power
+        # reset hero power and attack
         player.hero_power = True
-        player.attack = 0 if not player.weapon else player.weapon.attack
+        player.attack = 0
         player.attacked = False
         player.draw()
 
@@ -255,9 +253,10 @@ class Game:
                 else:
                     print("Not enough mana.")
             elif card_index == 10:
-                if player.attack > 0 and not player.attacked:
+                if player.attack > 0 or player.weapon and not player.attacked:
                     target = choose_target_enemy(player, opponent)
-                    deal_damage(target, player.attack)
+                    deal_damage(target, player.attack +
+                                (player.weapon.attack if player.weapon else 0))
                     # check if target is Player object
                     if not hasattr(target, 'use_hero_power'):
                         deal_damage(player, target.attack)
