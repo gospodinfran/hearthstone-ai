@@ -103,16 +103,18 @@ def destroyed_check(player: Player, opponent: Player):
             player.board.pop(index)
             player.destroyed[minion.name] = player.destroyed.get(
                 minion.name, 0) + 1
-            if minion.deathrattle:
-                minion.deathrattle(player, opponent)
+            if minion.deathrattles:
+                for dr in minion.deathrattles:
+                    dr(player, opponent)
     for minion in opponent.board:
         if minion.health < 1:
             index = opponent.board.index(minion)
             opponent.board.pop(index)
             opponent.destroyed[minion.name] = opponent.destroyed.get(
                 minion.name, 0) + 1
-            if minion.deathrattle:
-                minion.deathrattle(opponent, player)
+            if minion.deathrattles:
+                for dr in minion.deathrattles:
+                    dr(player, opponent)
 
 
 def deal_damage(target, damage):
@@ -282,7 +284,7 @@ def mark_of_nature(player, opponent):
         minion.health += 4
         # TODO, add taunt when implemented
 
-    choose_one(one, two, "Give a minion +4 Attack." "Or +4 Health and Taunt.")
+    choose_one(one, two, "Give a minion +4 Attack.", "Or +4 Health and Taunt.")
 
 
 def savage_roar(player, opponent):
@@ -293,6 +295,32 @@ def savage_roar(player, opponent):
             setattr(minion, 'attack', minion.attack - 2)
         minion.attack += 2
         player.one_of_effects.append(remove_attack)
+
+    apply_all_friendly_board(player, opponent, effect)
+
+
+def bite(player: Player, opponent: Player):
+    player.attack += 4
+    player.armor += 4
+
+
+def keeper_of_the_grove(player, opponent):
+    def one():
+        deal_damage(choose_target_any(player, opponent), 2)
+
+    def two():
+        # TODO: silence a minion
+        # silence(choose_any_minion(player, opponent))
+        pass
+
+    choose_one(one, two, "Deal 2 damage", "Silence a minion")
+
+
+def soul_of_the_forest(player, opponent):
+    def effect(minion: Minion):
+        def dr(player, opponent):
+            player.board.append(treant_token)
+        minion.deathrattles.append(dr)
 
     apply_all_friendly_board(player, opponent, effect)
 
@@ -333,11 +361,6 @@ def starfall(player, opponent):
 def starfire(player: Player, opponent: Player):
     deal_damage(choose_target_any(player, opponent), 5)
     player.draw()
-
-
-def bite(player: Player, opponent: Player):
-    player.attack += 4
-    player.armor += 4
 
 
 # Hunter
@@ -411,6 +434,9 @@ savagery_card = Card(1, savagery, "Savagery",
 mark_of_the_wild_card = Card(
     2, mark_of_the_wild, "Mark of the Wild", "Give a minion Taunt and +2/+2.")
 
+wild_growth_card = Card(cost=2, effect=wild_growth,
+                        name="Wild Growth", description="Gain an empty Mana Crystal.")
+
 wrath_card = Card(2, wrath, "Wrath",
                   "Choose One - Deal 3 damage to a minion; or 1 damage and draw a card.")
 
@@ -422,6 +448,15 @@ mark_of_nature_card = Card(3, mark_of_nature, "Mark of Nature",
 
 savage_roar_card = Card(3, savage_roar, "Savage Roar",
                         "Give your characters +2 Attack this turn")
+
+bite_card = Card(cost=4, effect=bite, name="Bite",
+                 description="Give your hero 4 Attack this turn. Gain 4 armor.")
+
+keeper_of_the_grove_card = Minion(4, 2, 4, keeper_of_the_grove, "Keeper of the Grove",
+                                  "Choose One - Deal 2 damage; or Silence a minion.")
+
+soul_of_the_forest_card = Card(4, soul_of_the_forest, "Soul of the Forest",
+                               "Give your minions 'Deathrattle: Summon a 2/2 Treant'.")
 
 swipe_card = Card(4, swipe, "Swipe",
                   "Choose One - Deal 5 damage to a minion; or 2 damage to all enemy minions.")
@@ -441,12 +476,6 @@ nourish_card = Card(cost=5, effect=nourish, name="Nourish",
                     description="Choose one - Gain 2 Mana Crystals; or Draw 3 cards.")
 
 
-wild_growth_card = Card(cost=2, effect=wild_growth,
-                        name="Wild Growth", description="Gain an empty Mana Crystal.")
-
-bite_card = Card(cost=4, effect=bite, name="Bite",
-                 description="Give your hero 4 Attack this turn. Gain 4 armor.")
-
 starfire_card = Card(cost=6, effect=starfire, name="Starfire",
                      description="Deal 5 damage. Draw a card.")
 
@@ -456,10 +485,11 @@ starfire_card = Card(cost=6, effect=starfire, name="Starfire",
 # Token Cards
 
 def strength_totem_effect(player, opponent):
-    filtered = [minion for minion in player.board if minion.name !=
-                strength_totem_token.name]
-    if filtered:
-        random.choice(filtered).attack += 1
+    if len(player.board) > 1:
+        randint = random.randint(0, len(player.board) - 1)
+        while player.board[randint].name == strength_totem_token.name:
+            randint = random.randint(0, len(player.board) - 1)
+        player.board[randint].attack += 1
 
 
 def healing_totem_effect(player, opponent):
@@ -476,6 +506,8 @@ def healing_totem(player, opponent):
     player.end_of_turn_effects.append(healing_totem_effect(player, opponent))
 
 
+treant_token = Minion(1, 2, 2, minion_no_effect, "Treant", "")
+
 searing_totem_token = Minion(
     1, 1, 1, minion_no_effect, "Searing totem", "", [Tribes.TOTEM])
 
@@ -483,10 +515,10 @@ stoneclaw_totem_token = Minion(
     1, 0, 2, minion_no_effect, "Stoneclaw totem", "", [Tribes.TOTEM])
 
 strength_totem_token = Minion(
-    1, 0, 2, strength_totem, "Strength totem", "", [Tribes.TOTEM], strength_totem_dr)
+    1, 0, 2, strength_totem, "Strength totem", "", [Tribes.TOTEM], [strength_totem_dr])
 
 healing_totem_token = Minion(
-    1, 0, 2, healing_totem, "Healing totem", "", [Tribes.TOTEM], healing_totem_dr)
+    1, 0, 2, healing_totem, "Healing totem", "", [Tribes.TOTEM], [healing_totem_dr])
 
 basic_totems = [
     searing_totem_token,
@@ -576,6 +608,8 @@ cards = [
     mark_of_nature_card,
     savage_roar_card,
     bite_card,
+    keeper_of_the_grove_card,
+    soul_of_the_forest_card,
     swipe_card,
     nourish_card,
     wild_growth_card,

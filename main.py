@@ -61,12 +61,24 @@ class Rogue(HeroClass):
 class Shaman(HeroClass):
     def use_power(self, player, opponent, target):
         if len(player.board) < 7:
-            rand_totem = random.choice(basic_totems)
-            if rand_totem.name == strength_totem_token.name:
-                player.end_of_turn_effects.append(strength_totem_effect)
-            elif rand_totem.name == healing_totem_token.name:
-                player.end_of_turn_effects.append(healing_totem_effect)
-            player.board.append(rand_totem)
+            # check if all 4 basic totems are on player board. if so don't allow hero power to go through
+            basic_totems_cpy = basic_totems.copy()
+            for totem in basic_totems_cpy:
+                for minion in player.board:
+                    if totem.name == minion.name:
+                        basic_totems_cpy = [
+                            t for t in basic_totems_cpy if t.name != totem.name]
+
+            if basic_totems_cpy:
+                rand_totem = random.choice(basic_totems_cpy)
+                if rand_totem.name == strength_totem_token.name:
+                    player.end_of_turn_effects.append(strength_totem_effect)
+                elif rand_totem.name == healing_totem_token.name:
+                    player.end_of_turn_effects.append(healing_totem_effect)
+                player.board.append(rand_totem)
+            else:
+                player.mana += 2
+                player.hero_power = True
 
 
 class Warlock(HeroClass):
@@ -144,12 +156,12 @@ class Card:
 
 
 class Minion(Card):
-    def __init__(self, cost, attack, health, effect, name, description, tribes: List[str] | None = None, deathrattle=None):
+    def __init__(self, cost, attack, health, effect, name, description, tribes: List[str] | None = None, deathrattles=[]):
         super().__init__(cost, effect, name, description)
         self.attack = attack
         self.max_health = health
         self.health = health
-        self.deathrattle = deathrattle
+        self.deathrattles = [dr for dr in deathrattles]
         self.tribes = set(tribes) if tribes else None
 
     def play(self, player: Player, opponent: Player):
