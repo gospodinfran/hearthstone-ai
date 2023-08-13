@@ -71,6 +71,8 @@ def choose_target_any(player: Player, opponent: Player) -> Player | Minion:
 
 
 def choose_any_minion(player, opponent) -> Tuple[Minion, int, Literal[1, 0]]:
+    # destructure like this:
+    # minion, index, p_or_o = choose_any_minion(player, opponent)
     i = 0
     print("------Enemy:------")
     for minion in opponent.board:
@@ -206,8 +208,8 @@ def claw(player: Player, opponent: Player):
 
 
 def naturalize(player, opponent):
-    target, index, p_or_o = choose_any_minion(player, opponent)
-    destroy_minion(player, opponent, target, index, p_or_o)
+    minion, index, p_or_o = choose_any_minion(player, opponent)
+    destroy_minion(player, opponent, minion, index, p_or_o)
     opponent.draw(2)
 
 
@@ -264,6 +266,37 @@ def wrath(player, opponent):
                "Deal 1 damage and draw a card.")
 
 
+def healing_touch(player: Player, opponent: Player):
+    target = choose_target_any(player, opponent)
+    target.health = min(target.max_health, target.health + 8)
+
+
+def mark_of_nature(player, opponent):
+    def one():
+        minion, index, p_or_o = choose_any_minion(player, opponent)
+        minion.attack += 4
+
+    def two():
+        minion, index, p_or_o = choose_any_minion(player, opponent)
+        minion.max_health += 4
+        minion.health += 4
+        # TODO, add taunt when implemented
+
+    choose_one(one, two, "Give a minion +4 Attack." "Or +4 Health and Taunt.")
+
+
+def savage_roar(player, opponent):
+    player.attack += 2
+
+    def effect(minion):
+        def remove_attack():
+            setattr(minion, 'attack', minion.attack - 2)
+        minion.attack += 2
+        player.one_of_effects.append(remove_attack)
+
+    apply_all_friendly_board(player, opponent, effect)
+
+
 def swipe(player, opponent):
     target = choose_target_enemy(player, opponent)
     deal_damage(target, 4)
@@ -295,11 +328,6 @@ def nourish(player: Player, opponent: Player):
 
 def starfall(player, opponent):
     pass
-
-
-def healing_touch(player: Player, opponent: Player):
-    target = choose_target_any(player, opponent)
-    target.health = min(target.max_health, target.health + 8)
 
 
 def starfire(player: Player, opponent: Player):
@@ -386,6 +414,15 @@ mark_of_the_wild_card = Card(
 wrath_card = Card(2, wrath, "Wrath",
                   "Choose One - Deal 3 damage to a minion; or 1 damage and draw a card.")
 
+healing_touch_card = Card(cost=3, effect=healing_touch,
+                          name="Healing Touch", description="Restore 8 Health.")
+
+mark_of_nature_card = Card(3, mark_of_nature, "Mark of Nature",
+                           "Choose One - Give a minion +4 Attack; or +4 Health and Taunt.")
+
+savage_roar_card = Card(3, savage_roar, "Savage Roar",
+                        "Give your characters +2 Attack this turn")
+
 swipe_card = Card(4, swipe, "Swipe",
                   "Choose One - Deal 5 damage to a minion; or 2 damage to all enemy minions.")
 
@@ -403,8 +440,6 @@ claw_card = Card(cost=1, effect=claw, name="Claw",
 nourish_card = Card(cost=5, effect=nourish, name="Nourish",
                     description="Choose one - Gain 2 Mana Crystals; or Draw 3 cards.")
 
-healing_touch_card = Card(cost=3, effect=healing_touch,
-                          name="Healing Touch", description="Restore 8 Health.")
 
 wild_growth_card = Card(cost=2, effect=wild_growth,
                         name="Wild Growth", description="Gain an empty Mana Crystal.")
@@ -537,10 +572,12 @@ cards = [
     savagery_card,
     mark_of_the_wild_card,
     wrath_card,
+    healing_touch_card,
+    mark_of_nature_card,
+    savage_roar_card,
     bite_card,
     swipe_card,
     nourish_card,
-    healing_touch_card,
     wild_growth_card,
     starfire_card,
     wisp_card,

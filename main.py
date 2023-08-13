@@ -92,6 +92,7 @@ class Player:
         self.fatigue: int = 0
         self.persistent_effects = None
         self.end_of_turn_effects: List[Callable] = []
+        self.one_of_effects: List[Callable] = []
         self.hand: List[Card] = []
         # minions and locations. array is good enough. O(1) time
         self.board: List[Card] = []
@@ -259,26 +260,27 @@ class Game:
                 else:
                     print("Not enough mana.")
             elif card_index == 10:
-                if player.attack > 0 or player.weapon and not player.attacked:
-                    target = choose_target_enemy(player, opponent)
-                    deal_damage(target, player.attack +
-                                (player.weapon.attack if player.weapon else 0))
-                    # check if target is Player object
-                    if not hasattr(target, 'use_hero_power'):
-                        deal_damage(player, target.attack)
-                    player.weapon_durability = max(
-                        0, player.weapon_durability - 1)
-                    if player.weapon_durability == 0:
-                        player.weapon == None
-                    player.attacked = True
-                    self.is_game_over(player.health, opponent.health)
-                    destroyed_check(player, opponent)
-                    self.print_hand(player)
-                    self.print_board()
-                    print(
-                        f"Player {index} HP: {player.health} ({player.armor} Armor)")
-                    print(
-                        f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
+                if not player.attacked:
+                    if player.attack > 0 or player.weapon:
+                        target = choose_target_enemy(player, opponent)
+                        deal_damage(target, player.attack +
+                                    (player.weapon.attack if player.weapon else 0))
+                        # check if target is Player object
+                        if not hasattr(target, 'use_hero_power'):
+                            deal_damage(player, target.attack)
+                        player.weapon_durability = max(
+                            0, player.weapon_durability - 1)
+                        if player.weapon_durability == 0:
+                            player.weapon == None
+                        player.attacked = True
+                        self.is_game_over(player.health, opponent.health)
+                        destroyed_check(player, opponent)
+                        self.print_hand(player)
+                        self.print_board()
+                        print(
+                            f"Player {index} HP: {player.health} ({player.armor} Armor)")
+                        print(
+                            f"Player {1 if index == 2 else 2} HP: {opponent.health} ({opponent.armor} Armor)")
 
                 else:
                     print(
@@ -306,6 +308,10 @@ class Game:
         # call when turn ends
         for effect in player.end_of_turn_effects:
             effect(player, opponent)
+
+        for effect in player.one_of_effects:
+            effect()
+        player.one_of_effects = []
 
     def print_board(self):
         print(
