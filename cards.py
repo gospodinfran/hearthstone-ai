@@ -71,7 +71,7 @@ def choose_target_any(player: Player, opponent: Player) -> Player | Minion:
 
 
 def choose_any_minion(player, opponent) -> Tuple[Minion, int, Literal[1, 0]]:
-    # destructure like this:
+    # recommended way to destructure:
     # minion, index, p_or_o = choose_any_minion(player, opponent)
     i = 0
     print("------Enemy:------")
@@ -343,6 +343,17 @@ def swipe(player, opponent):
     destroyed_check(player, opponent)
 
 
+def druid_of_the_claw(player, opponent):
+    def one():
+        # TODO, implement Charge, pass it here
+        pass
+
+    def two():
+        # TODO, give it Taunt and 2 health
+        pass
+    choose_one(one, two, "Gain Charge", "Gain +2 health and Taunt.")
+
+
 def nourish(player: Player, opponent: Player):
     def one():
         player.max_mana = min(10, player.max_mana + 1)
@@ -355,6 +366,22 @@ def nourish(player: Player, opponent: Player):
 
 
 def starfall(player, opponent):
+    def one():
+        minion, index, p_or_o = choose_any_minion(player, opponent)
+        deal_damage(minion, 5)
+
+    def two():
+        def effect(minion):
+            deal_damage(minion, 2)
+        apply_all_enemy_board(player, opponent, effect)
+
+    choose_one(one, two, "Deal 5 damage to a minion.",
+               "Deal 2 damage to all enemy minions.")
+
+    destroyed_check(player, opponent)
+
+
+def force_of_nature(player, opponent):
     pass
 
 
@@ -434,6 +461,9 @@ savagery_card = Card(1, savagery, "Savagery",
 mark_of_the_wild_card = Card(
     2, mark_of_the_wild, "Mark of the Wild", "Give a minion Taunt and +2/+2.")
 
+power_of_the_wild_card = Card(2, power_of_the_wild, "Power of the Wild",
+                              "Choose One - Give your minions +1/+1; or Summon a 3/2 Panther.")
+
 wild_growth_card = Card(cost=2, effect=wild_growth,
                         name="Wild Growth", description="Gain an empty Mana Crystal.")
 
@@ -461,6 +491,10 @@ soul_of_the_forest_card = Card(4, soul_of_the_forest, "Soul of the Forest",
 swipe_card = Card(4, swipe, "Swipe",
                   "Choose One - Deal 5 damage to a minion; or 2 damage to all enemy minions.")
 
+# not yet in cards array since not fully implemented
+druid_of_the_claw_card = Minion(
+    5, 4, 4, druid_of_the_claw, "Druid of the Claw", "Choose One - Charge; or +2 Health and Taunt.")
+
 eaglehorn_bow_card = Weapon(cost=3, effect=equip_weapon,
                             name="Eaglehorn Bow", description="", attack=3, durability=2)
 
@@ -475,6 +509,8 @@ claw_card = Card(cost=1, effect=claw, name="Claw",
 nourish_card = Card(cost=5, effect=nourish, name="Nourish",
                     description="Choose one - Gain 2 Mana Crystals; or Draw 3 cards.")
 
+starfall_card = Card(5, starfall, "Starfall",
+                     "Deal 5 damage to a minion; or 2 damage to all enemy minions.")
 
 starfire_card = Card(cost=6, effect=starfire, name="Starfire",
                      description="Deal 5 damage. Draw a card.")
@@ -603,6 +639,8 @@ cards = [
     naturalize_card,
     savagery_card,
     mark_of_the_wild_card,
+    power_of_the_wild_card,
+    wild_growth_card,
     wrath_card,
     healing_touch_card,
     mark_of_nature_card,
@@ -612,7 +650,7 @@ cards = [
     soul_of_the_forest_card,
     swipe_card,
     nourish_card,
-    wild_growth_card,
+    starfall_card,
     starfire_card,
     wisp_card,
     murloc_raider_card,
