@@ -125,7 +125,7 @@ class Player:
                 self.health -= self.fatigue
 
     def play(self, card, card_index, opponent):
-        self.mana -= card.mana_cost
+        self.mana -= card.cost
         popped_card: Card = self.hand.pop(card_index)
         popped_name = popped_card.name
         self.played[popped_name] = self.played.get(popped_name, 0) + 1
@@ -146,7 +146,7 @@ class Card:
     def __init__(self, cost, effect, name, description):
         self.name = name
         self.description = description
-        self.mana_cost = cost
+        self.cost = cost
         # effect for minions would be battlecry (it needs to survive to activate though)
         self.effect = effect
 
@@ -300,7 +300,7 @@ class Game:
                 pass
             elif 0 <= card_index < len(player.hand):
                 card: Card = player.hand[card_index]
-                if player.mana >= card.mana_cost:
+                if player.mana >= card.cost:
                     player.play(card=card, card_index=card_index,
                                 opponent=opponent)
                     destroyed_check(player, opponent)
@@ -339,7 +339,7 @@ class Game:
         print(f"0. Hero Power {int(player.hero_power)}/1")
         for i, card in enumerate(player.hand):
             print(
-                f"{i + 1}. {card.name}, {card.mana_cost} MANA. {card.description}")
+                f"{i + 1}. {card.name}, {card.cost} MANA. {card.description}")
         if player.attack > 0 or player.weapon:
             print("11. Attack with hero.")
 
@@ -355,7 +355,8 @@ class Game:
 
 
 if __name__ == "__main__":
-    p1_deck = get_random_deck(cards)
-    p2_deck = get_random_deck(cards)
+    # decks are shuffled when the game starts
+    p1_deck = generate_deck(cards)
+    p2_deck = generate_deck(cards)
     game = Game(p1_deck=p1_deck, p2_deck=p2_deck)
     game.game_loop()

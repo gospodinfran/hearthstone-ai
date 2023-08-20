@@ -632,6 +632,21 @@ bloodsail_raider_card = Minion(cost=2, attack=2, health=3, effect=elven_archer, 
                                description="Battlecry: Gain Attack equal to the Attack of your weapon.")
 
 
+def card_factory(card: Card):
+    if hasattr(card, "tribes"):
+        # minion
+        return Minion(card.cost, card.attack, card.health, card.effect, card.name, card.description, card.tribes, card.deathrattles)
+    elif hasattr(card, "durability"):
+        # weapon
+        return Weapon(card.cost, card.effect, card.name, card.description, card.attack, card.durability)
+    else:
+        # spell
+        return Card(card.cost, card.effect, card.name, card.description)
+
+# cards are initialized only once and are then reused. fix this and the bug will go away.
+
+
+# card templates for the factory
 cards = [
     innervate_card,
     moonfire_card,
@@ -667,6 +682,14 @@ cards = [
     eaglehorn_bow_card,
     gladiators_longbow_card,
 ]
+
+
+def generate_deck(cards):
+    deck = []
+    for card in cards:
+        deck.extend([card_factory(card), card_factory(card)])
+    return deck
+
 
 incomplete_cards = [
     abusive_sergeant_card,
