@@ -1,6 +1,5 @@
 from typing import List, Dict, Callable
 from cards import *
-from testing import get_random_deck
 import random
 
 
@@ -182,6 +181,9 @@ class Minion(Card):
             except ValueError:
                 print("no bueno")
 
+    def __str__(self):
+        return f'{self.name} [{self.attack}/{self.health}]'
+
 
 class Weapon(Card):
     def __init__(self, cost, effect, name, description, attack, durability):
@@ -327,9 +329,9 @@ class Game:
 
     def print_board(self):
         print(
-            f"Player 1 board: {', '.join(f'{card.name} [{card.attack}/{card.health}]' for card in self.player1.board)}")
+            f"Player 1 board: {', '.join(str(minion) for minion in self.player1.board)}")
         print(
-            f"Player 2 board: {', '.join(f'{card.name} [{card.attack}/{card.health}]'for card in self.player2.board)}")
+            f"Player 2 board: {', '.join(str(minion) for minion in self.player2.board)}")
         print("-------------------------------------------------")
 
     @staticmethod
