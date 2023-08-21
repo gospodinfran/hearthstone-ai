@@ -121,7 +121,11 @@ class Player:
                     self.deck.pop()
             else:
                 self.fatigue += 1
-                self.health -= self.fatigue
+                self.take_damage(self.fatigue)
+        over, winner = game.is_game_over(
+            game.player1.health, game.player2.health)
+        if over:
+            print(winner)
 
     def play(self, card, card_index, opponent):
         self.mana -= card.cost

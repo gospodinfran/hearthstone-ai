@@ -382,7 +382,16 @@ def starfall(player, opponent):
 
 
 def force_of_nature(player, opponent):
-    pass
+    treant1 = card_factory(treant_token)
+    treant2 = card_factory(treant_token)
+    treant3 = card_factory(treant_token)
+    player.board.extend([treant1, treant2, treant3])
+
+    def effect():
+        player.board.remove(treant1)
+        player.board.remove(treant2)
+        player.board.remove(treant3)
+    player.one_of_effects.append(effect)
 
 
 def starfire(player: Player, opponent: Player):
@@ -511,6 +520,9 @@ nourish_card = Card(cost=5, effect=nourish, name="Nourish",
 
 starfall_card = Card(5, starfall, "Starfall",
                      "Deal 5 damage to a minion; or 2 damage to all enemy minions.")
+
+force_of_nature_card = Card(6, force_of_nature, "Force of Nature",
+                            "Summon three 2/2 Treants with Charge that die at the end of the turn.")
 
 starfire_card = Card(cost=6, effect=starfire, name="Starfire",
                      description="Deal 5 damage. Draw a card.")
@@ -651,36 +663,37 @@ cards = [
     innervate_card,
     moonfire_card,
     claw_card,
-    naturalize_card,
-    savagery_card,
-    mark_of_the_wild_card,
-    power_of_the_wild_card,
-    wild_growth_card,
-    wrath_card,
-    healing_touch_card,
-    mark_of_nature_card,
-    savage_roar_card,
-    bite_card,
-    keeper_of_the_grove_card,
-    soul_of_the_forest_card,
-    swipe_card,
-    nourish_card,
-    starfall_card,
-    starfire_card,
-    wisp_card,
-    murloc_raider_card,
-    bloodsail_corsair_card,
-    bloodfen_raptor_card,
-    river_crocolisk_card,
-    magma_rager_card,
-    chillwind_yeti_card,
-    oasis_snapjaw_card,
-    boulderfirst_ogre,
-    core_hound_card,
-    war_golem_card,
-    acidic_swamp_ooze_card,
-    eaglehorn_bow_card,
-    gladiators_longbow_card,
+    # naturalize_card,
+    # savagery_card,
+    # mark_of_the_wild_card,
+    # power_of_the_wild_card,
+    # wild_growth_card,
+    # wrath_card,
+    # healing_touch_card,
+    # mark_of_nature_card,
+    # savage_roar_card,
+    # bite_card,
+    # keeper_of_the_grove_card,
+    # soul_of_the_forest_card,
+    # swipe_card,
+    # nourish_card,
+    # starfall_card,
+    force_of_nature_card,
+    # starfire_card,
+    # wisp_card,
+    # murloc_raider_card,
+    # bloodsail_corsair_card,
+    # bloodfen_raptor_card,
+    # river_crocolisk_card,
+    # magma_rager_card,
+    # chillwind_yeti_card,
+    # oasis_snapjaw_card,
+    # boulderfirst_ogre,
+    # core_hound_card,
+    # war_golem_card,
+    # acidic_swamp_ooze_card,
+    # eaglehorn_bow_card,
+    # gladiators_longbow_card,
 ]
 
 
