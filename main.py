@@ -122,10 +122,7 @@ class Player:
             else:
                 self.fatigue += 1
                 self.take_damage(self.fatigue)
-        over, winner = game.is_game_over(
-            game.player1.health, game.player2.health)
-        if over:
-            print(winner)
+        game.is_game_over(game.player1.health, game.player2.health)
 
     def play(self, card, card_index, opponent):
         self.mana -= card.cost
@@ -206,9 +203,9 @@ class Game:
         self.player2 = Player(deck=p2_deck)
         random.shuffle(self.player1.deck)
         random.shuffle(self.player2.deck)
+        self.game_end = False
 
     def game_loop(self):
-        game_end = False
         self.player1.draw(3)
         self.player2.draw(4)
         self.player2.hand.append(coin_card)
@@ -218,20 +215,19 @@ class Game:
         )
         print("-------------------------------------------------")
 
-        while not game_end:
-            self.turn(player=self.player1, index=1, opponent=self.player2)
+        index = 1
+        player, opponent = self.player1, self.player2
+        while self.game_end == False:
+            self.turn(player, index, opponent)
 
             game_end, winner = self.is_game_over(
                 self.player1.health, self.player2.health)
             if game_end:
-                return winner
+                self.game_end == True
+                break
 
-            self.turn(player=self.player2, index=2, opponent=self.player1)
-
-            game_end, winner = self.is_game_over(
-                self.player1.health, self.player2.health)
-            if game_end:
-                return winner
+            index = 2 if index == 1 else 1
+            player, opponent = opponent, player
 
     def turn(self, player: Player, index: int, opponent: Player):
         print(f"Player {index}'s turn!")
@@ -243,6 +239,10 @@ class Game:
         player.attack = 0
         player.attacked = False
         player.draw()
+        over, winner = game.is_game_over(
+            game.player1.health, game.player2.health)
+        if over:
+            return
 
         # printing for debugging/interface
         print(f"Player {index} mana: {player.mana}/{player.max_mana}")
@@ -272,7 +272,6 @@ class Game:
                     if player.use_hero_power(player=player, opponent=opponent,
                                              target=target):
                         destroyed_check(player, opponent)
-                        self.is_game_over(player.health, opponent.health)
                         self.print_hand(player)
                         self.print_board()
                 else:
@@ -291,7 +290,8 @@ class Game:
                         if player.weapon_durability == 0:
                             player.weapon == None
                         player.attacked = True
-                        self.is_game_over(player.health, opponent.health)
+                        self.is_game_over(self.player1.health,
+                                          self.player2.health)
                         destroyed_check(player, opponent)
                         self.print_hand(player)
                         self.print_board()
@@ -322,6 +322,10 @@ class Game:
                     print("Not enough mana.")
             else:
                 print("Not a valid card index.")
+            game_over, winner = self.is_game_over(
+                self.player1.health, self.player2.health)
+            if game_over:
+                break
 
         # call when turn ends
         for effect in player.end_of_turn_effects:
@@ -353,9 +357,11 @@ class Game:
     def is_game_over(p1_health, p2_health):
         if p1_health < 1:
             print("Player 2 wins!")
+            game.game_end == True
             return True, "Player2"
         if p2_health < 1:
             print("Player 1 wins!")
+            game.game_end == True
             return True, "Player1"
         return False, None
 
