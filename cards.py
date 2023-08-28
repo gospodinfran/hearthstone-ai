@@ -124,6 +124,10 @@ def deal_damage(target, damage):
         target.health -= damage
 
 
+def restore_health(target: Player | Minion, amount: int):
+    target.health = min(target.max_health, target.health + amount)
+
+
 def apply_all_enemy_board(player, opponent, effect):
     for minion in opponent.board:
         effect(minion)
@@ -399,7 +403,58 @@ def starfire(player: Player, opponent: Player):
     player.draw()
 
 
+def ancient_of_lore(player, opponent):
+    def one():
+        player.draw(2)
+
+    def two():
+        restore_health(choose_target_any(player, opponent), 5)
+
+    choose_one(one, two, "Draw 2 cards.", "Restore 5 Health.")
+
+
+def ancient_of_war(player, opponent):
+    # TODO, target self somehow
+    # currently most sensible way is seeing if ancient already exists and it isn't damaged: no muy bueno
+
+    def one():
+        target = None
+        for minion in player.board:
+            if minion.name == "Ancient of War" and minion.attack == 5 and minion.health == 5:
+                target = minion
+        if target:
+            target.attack += 5
+
+    def two():
+        target = None
+        for minion in player.board:
+            if minion.name == "Ancient of War" and minion.attack == 5 and minion.health == 5:
+                target = minion
+        if target:
+            target.max_health += 5
+            target.health = target.max_health
+    choose_one(one, two, "Gain +5 Attack.", "Gain +5 Health and Taunt.")
+
+
+def cenarius(player, opponent):
+    def one():
+        def effect(minion):
+            if minion.name == "Cenarius":
+                return
+            minion.attack += 2
+            minion.max_health += 2
+            minion.health = minion.max_health
+        apply_all_friendly_board(player, opponent, effect)
+
+    def two():
+        # TODO give them taunt
+        player.board.extend([treant_token, treant_token])
+
+    choose_one(one, two, "Give your other minions +2/+2.",
+               "Summon two 2/2 Treants with Taunt.")
+
 # Hunter
+
 
 def arcane_shot(player, opponent):
     deal_damage(choose_target_any(player, opponent), 2)
@@ -526,6 +581,18 @@ force_of_nature_card = Card(6, force_of_nature, "Force of Nature",
 
 starfire_card = Card(cost=6, effect=starfire, name="Starfire",
                      description="Deal 5 damage. Draw a card.")
+
+ancient_of_lore_card = Minion(7, 5, 5, ancient_of_lore, "Ancient of Lore",
+                              "Choose One - Draw 2 cards; or Restore 5 Health.")
+
+ancient_of_war_card = Minion(7, 5, 5, ancient_of_war, "Ancient of War",
+                             "Choose One - +5 Attack or; +5 Health and Taunt.")
+
+ironbark_prodector_card = Minion(
+    8, 8, 8, minion_no_effect, "Ironbark Protector", "Taunt")
+
+cenarius_card = Minion(9, 5, 8, cenarius, "Cenarius",
+                       "Choose One - Give your other minions +2/+2; or Summon two 2/2 Treants with Taunt.")
 
 # Paladin
 
@@ -663,37 +730,41 @@ cards = [
     innervate_card,
     moonfire_card,
     claw_card,
-    # naturalize_card,
-    # savagery_card,
-    # mark_of_the_wild_card,
-    # power_of_the_wild_card,
-    # wild_growth_card,
-    # wrath_card,
-    # healing_touch_card,
-    # mark_of_nature_card,
-    # savage_roar_card,
-    # bite_card,
-    # keeper_of_the_grove_card,
-    # soul_of_the_forest_card,
-    # swipe_card,
-    # nourish_card,
-    # starfall_card,
+    naturalize_card,
+    savagery_card,
+    mark_of_the_wild_card,
+    power_of_the_wild_card,
+    wild_growth_card,
+    wrath_card,
+    healing_touch_card,
+    mark_of_nature_card,
+    savage_roar_card,
+    bite_card,
+    keeper_of_the_grove_card,
+    soul_of_the_forest_card,
+    swipe_card,
+    nourish_card,
+    starfall_card,
     force_of_nature_card,
-    # starfire_card,
-    # wisp_card,
-    # murloc_raider_card,
-    # bloodsail_corsair_card,
-    # bloodfen_raptor_card,
-    # river_crocolisk_card,
-    # magma_rager_card,
-    # chillwind_yeti_card,
-    # oasis_snapjaw_card,
-    # boulderfirst_ogre,
-    # core_hound_card,
-    # war_golem_card,
-    # acidic_swamp_ooze_card,
-    # eaglehorn_bow_card,
-    # gladiators_longbow_card,
+    starfire_card,
+    ancient_of_lore_card,
+    ancient_of_war_card,
+    ironbark_prodector_card,
+    cenarius_card,
+    wisp_card,
+    murloc_raider_card,
+    bloodsail_corsair_card,
+    bloodfen_raptor_card,
+    river_crocolisk_card,
+    magma_rager_card,
+    chillwind_yeti_card,
+    oasis_snapjaw_card,
+    boulderfirst_ogre,
+    core_hound_card,
+    war_golem_card,
+    acidic_swamp_ooze_card,
+    eaglehorn_bow_card,
+    gladiators_longbow_card
 ]
 
 

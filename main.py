@@ -165,7 +165,7 @@ class Minion(Card):
         self.tribes = set(tribes) if tribes else None
 
     def play(self, player: Player, opponent: Player):
-        super().play(player, opponent)
+        # Adds minion to board first then plays effect. This helps with choose one effects that buff themselves.
         if not player.board:
             player.board.append(self)
         else:
@@ -181,6 +181,8 @@ class Minion(Card):
                 player.board.insert(pos - 1, self)
             except ValueError:
                 print("no bueno")
+
+        super().play(player, opponent)
 
     def __str__(self):
         return f'{self.name} [{self.attack}/{self.health}]'
