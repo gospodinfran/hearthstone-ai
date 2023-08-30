@@ -128,6 +128,11 @@ def restore_health(target: Player | Minion, amount: int):
     target.health = min(target.max_health, target.health + amount)
 
 
+def increase_health(target: Player | Minion, amount):
+    target.max_health += amount
+    target.health += amount
+
+
 def apply_all_enemy_board(player, opponent, effect):
     for minion in opponent.board:
         effect(minion)
@@ -138,8 +143,11 @@ def apply_all_friendly_board(player, opponent, effect):
         effect(minion)
 
 
-def apply_all(player, opponent, effect):
-    pass
+def apply_all_board(player, opponent, effect):
+    for minion in player.board:
+        effect(minion)
+    for minion in opponent.board:
+        effect(minion)
 
 
 def coin_effect(player: 'Player', opponent):
@@ -476,6 +484,49 @@ def misdirection(player, opponent):
 def snake_trap(player, opponent):
     pass
 
+# Priest
+
+
+def circle_of_healing(player, opponent):
+    def effect(minion):
+        restore_health(minion, 4)
+    apply_all_board(player, opponent, effect)
+
+
+def silence(player, opponent):
+    # TODO, silence
+    pass
+
+
+def holy_smite(player, opponent):
+    deal_damage(choose_target_any(player, opponent), 2)
+
+
+def inner_fire(player, opponent):
+    minion, index, p_or_o = choose_any_minion(player, opponent)
+    minion.attack = minion.health
+
+
+def mind_vision(player, opponent):
+    rand_card = random.choice(opponent.hand)
+    player.hand.append(rand_card)
+
+
+def power_word_shield(player, opponent):
+    minion, i, p_or_r = choose_any_minion(player, opponent)
+    increase_health(minion, 2)
+    player.draw()
+
+
+def divine_spirit(player, opponent):
+    minion, index, p_or_o = choose_any_minion(player, opponent)
+    increase_health(minion, minion.health)
+
+
+def mind_blast(player, opponent):
+    deal_damage(opponent, 5)
+
+
 # logic for the following two weapons is incomplete. card text not implemented yet.
 
 
@@ -593,6 +644,29 @@ ironbark_prodector_card = Minion(
 
 cenarius_card = Minion(9, 5, 8, cenarius, "Cenarius",
                        "Choose One - Give your other minions +2/+2; or Summon two 2/2 Treants with Taunt.")
+
+# Priest cards
+
+circle_of_healing_card = Card(
+    0, circle_of_healing, "Circle of Healing", "Restore 4 Health to ALL minions.")
+
+holy_smite_card = Card(1, holy_smite, "Holy Smite", "Deal 2 damage.")
+
+inner_fire_card = Card(1, inner_fire, "Inner Fire",
+                       "Change a minion's Attack to be equal to its Health.")
+
+mind_vision_card = Card(1, mind_vision, "Mind Vision",
+                        "Put a copy of a random card in your opponent's hand into your hand.")
+
+power_word_shield_card = Card(
+    1, power_word_shield, "Power Word: Shield", "Give a minion +2 Health. Draw a card.")
+
+divine_spirit_card = Card(
+    2, divine_spirit, "Divine Spirit", "Double a minion's health.")
+
+mind_blast_card = Card(2, mind_blast, "Mind Blast",
+                       "Deal 5 damage to the enemy hero.")
+
 
 # Paladin
 
@@ -727,30 +801,37 @@ def card_factory(card: Card):
 
 # card templates for the factory
 cards = [
-    innervate_card,
-    moonfire_card,
-    claw_card,
-    naturalize_card,
-    savagery_card,
-    mark_of_the_wild_card,
-    power_of_the_wild_card,
-    wild_growth_card,
-    wrath_card,
-    healing_touch_card,
-    mark_of_nature_card,
-    savage_roar_card,
-    bite_card,
-    keeper_of_the_grove_card,
-    soul_of_the_forest_card,
-    swipe_card,
-    nourish_card,
-    starfall_card,
-    force_of_nature_card,
-    starfire_card,
-    ancient_of_lore_card,
-    ancient_of_war_card,
-    ironbark_prodector_card,
-    cenarius_card,
+    # innervate_card,
+    # moonfire_card,
+    # claw_card,
+    # naturalize_card,
+    # savagery_card,
+    # mark_of_the_wild_card,
+    # power_of_the_wild_card,
+    # wild_growth_card,
+    # wrath_card,
+    # healing_touch_card,
+    # mark_of_nature_card,
+    # savage_roar_card,
+    # bite_card,
+    # keeper_of_the_grove_card,
+    # soul_of_the_forest_card,
+    # swipe_card,
+    # nourish_card,
+    # starfall_card,
+    # force_of_nature_card,
+    # starfire_card,
+    # ancient_of_lore_card,
+    # ancient_of_war_card,
+    # ironbark_prodector_card,
+    # cenarius_card,
+    circle_of_healing_card,
+    holy_smite_card,
+    inner_fire_card,
+    mind_vision_card,
+    power_word_shield_card,
+    divine_spirit_card,
+    mind_blast_card,
     wisp_card,
     murloc_raider_card,
     bloodsail_corsair_card,
