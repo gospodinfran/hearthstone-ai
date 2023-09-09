@@ -156,13 +156,15 @@ class Card:
 
 
 class Minion(Card):
-    def __init__(self, cost, attack, health, effect, name, description, tribes: List[str] | None = None, deathrattles=[]):
+    def __init__(self, cost, attack, health, effect, name, description, tribes: List[str] | None = None, deathrattles=[], taunt=False, charge=False):
         super().__init__(cost, effect, name, description)
         self.attack = attack
         self.max_health = health
         self.health = health
         self.deathrattles = [dr for dr in deathrattles]
         self.tribes = set(tribes) if tribes else None
+        self.taunt = taunt
+        self.charge = charge
 
     def play(self, player: Player, opponent: Player):
         # Adds minion to board first then plays effect. This helps with choose one effects that buff themselves.
@@ -603,7 +605,7 @@ def mark_of_the_wild(player, opponent):
     minion.max_health += 2
     minion.health += 2
     minion.attack += 2
-    # TODO add taunt
+    minion.taunt = True
 
 
 def power_of_the_wild(player, opponent):
@@ -658,7 +660,7 @@ def mark_of_nature(player, opponent):
         minion, index, p_or_o = choose_any_minion(player, opponent)
         minion.max_health += 4
         minion.health += 4
-        # TODO, add taunt when implemented
+        minion.taunt = True
 
     choose_one(one, two, "Give a minion +4 Attack.", "Or +4 Health and Taunt.")
 
@@ -721,12 +723,17 @@ def swipe(player, opponent):
 
 def druid_of_the_claw(player, opponent):
     def one():
-        # TODO, implement Charge, pass it here
-        pass
+        for minion in player.board:
+            if minion.name == 'Druid of the Claw' and minion.attack == 4 and minion.health == 4:
+                minion.charge = True
 
     def two():
-        # TODO, give it Taunt and 2 health
-        pass
+        for minion in player.board:
+            if minion.name == 'Druid of the Claw' and minion.attack == 4 and minion.health == 4:
+                minion.taunt = True
+                minion.max_health += 2
+                minion.health = minion.max_health
+
     choose_one(one, two, "Gain Charge", "Gain +2 health and Taunt.")
 
 
@@ -1165,30 +1172,31 @@ def card_factory(card: Card):
 
 # card templates for the factory
 cards = [
-    # innervate_card,
-    # moonfire_card,
-    # claw_card,
-    # naturalize_card,
-    # savagery_card,
-    # mark_of_the_wild_card,
-    # power_of_the_wild_card,
-    # wild_growth_card,
-    # wrath_card,
-    # healing_touch_card,
-    # mark_of_nature_card,
-    # savage_roar_card,
-    # bite_card,
-    # keeper_of_the_grove_card,
-    # soul_of_the_forest_card,
-    # swipe_card,
-    # nourish_card,
-    # starfall_card,
-    # force_of_nature_card,
-    # starfire_card,
-    # ancient_of_lore_card,
-    # ancient_of_war_card,
-    # ironbark_prodector_card,
-    # cenarius_card,
+    innervate_card,
+    moonfire_card,
+    claw_card,
+    naturalize_card,
+    savagery_card,
+    mark_of_the_wild_card,
+    power_of_the_wild_card,
+    wild_growth_card,
+    wrath_card,
+    healing_touch_card,
+    mark_of_nature_card,
+    savage_roar_card,
+    bite_card,
+    keeper_of_the_grove_card,
+    soul_of_the_forest_card,
+    swipe_card,
+    druid_of_the_claw_card,
+    nourish_card,
+    starfall_card,
+    force_of_nature_card,
+    starfire_card,
+    ancient_of_lore_card,
+    ancient_of_war_card,
+    ironbark_prodector_card,
+    cenarius_card,
     circle_of_healing_card,
     holy_smite_card,
     inner_fire_card,

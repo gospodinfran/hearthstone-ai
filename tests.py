@@ -109,6 +109,8 @@ class TestWarlock(unittest.TestCase):
         self.assertEqual(len(p.hand), handsize + 1,
                          "Warlock Hero Power does not work properly.")
 
+# TODO: make unit test for Minion class
+
 
 if __name__ == "__main__":
     unittest.main()
