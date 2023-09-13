@@ -42,7 +42,7 @@ class Hunter(HeroClass):
 class Paladin(HeroClass):
     def use_power(self, player, opponent, target):
         if len(player.board) < 7:
-            player.board.append(silver_hand_recruit)
+            player.board.append(card_factory(silver_hand_recruit))
 
 
 class Druid(HeroClass):
@@ -86,9 +86,9 @@ class Warlock(HeroClass):
 
 
 class Player:
-    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Shaman(), starting_mana=0):
-        self.health: int = 35 if renathal else 30
+    def __init__(self, deck=None, renathal=False, hero_class: HeroClass = Mage(), starting_mana=0):
         self.max_health: int = 35 if renathal else 30
+        self.health = self.max_health
         self.hero_class: HeroClass = hero_class
         self.hero_power: bool = True
         self.armor: int = 0
@@ -109,7 +109,14 @@ class Player:
         self.played: Dict[Card] = {}
         self.destroyed: Dict[Card] = {}
         self.deck: List[Card] = [
-            moonfire_card for _ in range(30)] if deck is None else deck
+            card_factory(moonfire_card) for _ in range(30)] if deck is None else deck
+
+    def take_damage(self, damage):
+        if self.armor >= damage:
+            self.armor -= damage
+        else:
+            self.health += self.armor - damage
+            self.armor = 0
 
     def draw(self, amount=1):
         for _ in range(amount):
@@ -130,13 +137,6 @@ class Player:
         popped_name = popped_card.name
         self.played[popped_name] = self.played.get(popped_name, 0) + 1
         card.play(self, opponent)
-
-    def take_damage(self, damage):
-        if self.armor >= damage:
-            self.armor -= damage
-        else:
-            self.health += self.armor - damage
-            self.armor = 0
 
     def use_hero_power(self, player=None, opponent=None, target=None):
         return self.hero_class.use_hero_power(self, opponent, target)
