@@ -23,3 +23,7 @@ python3 tests.py
 ## Using the CLI
 
 Player options appear as 0-indexed numbers which are sorted in the CLI. If you want to play an action input the corresponding number and click enter on the keyboard. If prompted again, e.g. to choose a target, input a number and click enter. When the player is done with his turn, he can click enter with no prior input to end his turn. 
+
+![Positioning](./assets/Positioning.png)
+
+Just like in Hearthstone, the positioning of your minions is a key game mechanic to be aware of and play around. Due to that, minion positioning works the same way as it does in hearthstone. If there are no minions on player's board, the minion will be placed in the center. Otherwise, the player can choose to play a minion on the left or the right of any existing minion on the board.
