@@ -136,7 +136,7 @@ class Player:
         popped_card: Card = self.hand.pop(card_index)
         popped_name = popped_card.name
         self.played[popped_name] = (self.played.get(
-            popped_name, 0) + 1, game.current_turn)
+            popped_name[0], 0) + 1, game.current_turn)
         card.play(self, opponent)
 
     def use_hero_power(self, player=None, opponent=None, target=None):
@@ -155,7 +155,8 @@ class Card:
         return self.name
 
     def play(self, player: Player, opponent: Player):
-        player.played[self.name] = player.played.get(self.name, 0) + 1
+        # redundant code?
+        # player.played[self.name] = player.played.get(self.name, 0) + 1
         self.effect(player, opponent)
 
 
