@@ -135,7 +135,8 @@ class Player:
         self.mana -= card.cost
         popped_card: Card = self.hand.pop(card_index)
         popped_name = popped_card.name
-        self.played[popped_name] = self.played.get(popped_name, 0) + 1
+        self.played[popped_name] = (self.played.get(
+            popped_name, 0) + 1, game.current_turn)
         card.play(self, opponent)
 
     def use_hero_power(self, player=None, opponent=None, target=None):
@@ -149,6 +150,9 @@ class Card:
         self.cost = cost
         # effect for minions would be battlecry (it needs to survive to activate though)
         self.effect = effect
+
+    def __str__(self):
+        return self.name
 
     def play(self, player: Player, opponent: Player):
         player.played[self.name] = player.played.get(self.name, 0) + 1
@@ -165,6 +169,9 @@ class Minion(Card):
         self.tribes = set(tribes) if tribes else None
         self.taunt = taunt
         self.charge = charge
+
+    def __str__(self):
+        return f'{self.name} [{self.attack}/{self.health}]'
 
     def play(self, player: Player, opponent: Player):
         # Adds minion to board first then plays effect. This helps with choose one effects that buff themselves.
@@ -186,9 +193,6 @@ class Minion(Card):
 
         super().play(player, opponent)
 
-    def __str__(self):
-        return f'{self.name} [{self.attack}/{self.health}]'
-
 
 class Weapon(Card):
     def __init__(self, cost, effect, name, description, attack, durability):
@@ -205,9 +209,10 @@ class Game:
     def __init__(self, p1_deck=None, p2_deck=None):
         self.player1 = Player(deck=p1_deck)
         self.player2 = Player(deck=p2_deck)
+        self.current_turn: int = 0
+        self.game_end = False
         random.shuffle(self.player1.deck)
         random.shuffle(self.player2.deck)
-        self.game_end = False
 
     def game_loop(self):
         self.player1.draw(3)
@@ -222,6 +227,7 @@ class Game:
         index = 1
         player, opponent = self.player1, self.player2
         while self.game_end == False:
+            self.current_turn += 1
             self.turn(player, index, opponent)
 
             game_end, winner = self.is_game_over(
@@ -353,7 +359,7 @@ class Game:
         print(f"0. Hero Power {int(player.hero_power)}/1")
         for i, card in enumerate(player.hand):
             print(
-                f"{i + 1}. {card.name}, {card.cost} MANA. {card.description}")
+                f"{i + 1}. {card}, {card.cost} MANA. {card.description}")
         if player.attack > 0 or player.weapon:
             print("11. Attack with hero.")
 
